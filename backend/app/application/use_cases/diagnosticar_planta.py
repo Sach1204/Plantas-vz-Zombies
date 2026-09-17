@@ -57,6 +57,16 @@ class DiagnosticarPlanta:
         return {
             "especie": medicion.especie,
             "estado": estado.value,
-            "parametros": parametros,
+            "parametros": [
+                {
+                    "nombre": parametro.nombre,
+                    "valor": parametro.valor,
+                    "unidad": parametro.unidad,
+                    "rango_min": parametro.rango_min,
+                    "rango_max": parametro.rango_max,
+                    "estado": parametro.estado.value,
+                }
+                for parametro in parametros
+            ],
             "recomendaciones": recomendaciones
         }
