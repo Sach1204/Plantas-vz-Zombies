@@ -2,8 +2,9 @@ from pathlib import Path
 
 from app import create_app
 from app.application.use_cases.diagnosticar_planta import DiagnosticarPlanta
+from app.domain.entities.indice_vitalidad import IndiceVitalidad
 from app.domain.entities.medicion import Medicion
-from app.domain.services.evaluador_planta import EvaluadorPlanta
+from app.domain.services.evaluador_planta import AgregadorVitalidad, EvaluadorPlanta
 from app.domain.services.recomendador import Recomendador
 from app.infrastructure.repositories.csv_referencia_plantas import CSVReferenciaPlantas
 
@@ -127,3 +128,18 @@ def test_api_rechaza_valor_fuera_de_rango_fisico():
 
     assert response.status_code == 400
     assert response.get_json()["error"] == "VALOR_FUERA_DE_RANGO_FISICO"
+
+
+def test_evaluador_acepta_estrategia_de_agregacion_customizada():
+    class AgregadorPersonalizado:
+        def calcular(self, resultados):
+            return IndiceVitalidad.SALUDABLE
+
+    evaluador = EvaluadorPlanta(agregador=AgregadorPersonalizado())
+    resultados = [
+        evaluador.evaluar_parametro("humedad", 40, 30, 60, "%"),
+        evaluador.evaluar_parametro("luz", 500, 400, 800, "lux"),
+    ]
+
+    assert evaluador.calcular_indice(resultados) == IndiceVitalidad.SALUDABLE
+    assert isinstance(evaluador.agregador, AgregadorPersonalizado)

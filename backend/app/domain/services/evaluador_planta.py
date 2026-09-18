@@ -3,7 +3,27 @@ from app.domain.entities.indice_vitalidad import IndiceVitalidad
 from app.domain.entities.resultado_parametro import ResultadoParametro
 
 
+class AgregadorVitalidad:
+
+    def calcular(self, resultados):
+        fuera_de_rango = sum(
+            1 for resultado in resultados
+            if resultado.estado != EstadoParametro.OPTIMO
+        )
+
+        if fuera_de_rango == 0:
+            return IndiceVitalidad.SALUDABLE
+
+        if fuera_de_rango == 1:
+            return IndiceVitalidad.EN_RIESGO
+
+        return IndiceVitalidad.CRITICO
+
+
 class EvaluadorPlanta:
+
+    def __init__(self, agregador=None):
+        self.agregador = agregador or AgregadorVitalidad()
 
     def evaluar_parametro(
         self,
@@ -29,17 +49,22 @@ class EvaluadorPlanta:
             estado
         )
 
-    def calcular_indice(self, resultados):
+    def evaluar_parametros(self, configuracion_parametros):
+        resultados = []
 
-        fuera_de_rango = sum(
-            1 for resultado in resultados
-            if resultado.estado != EstadoParametro.OPTIMO
-        )
+        for parametro in configuracion_parametros:
+            resultados.append(
+                self.evaluar_parametro(
+                    parametro["nombre"],
+                    parametro["valor"],
+                    parametro["minimo"],
+                    parametro["maximo"],
+                    parametro["unidad"],
+                )
+            )
 
-        if fuera_de_rango == 0:
-            return IndiceVitalidad.SALUDABLE
+        return resultados
 
-        if fuera_de_rango == 1:
-            return IndiceVitalidad.EN_RIESGO
-
-        return IndiceVitalidad.CRITICO
+    def calcular_indice(self, resultados, agregador=None):
+        estrategia = agregador or self.agregador
+        return estrategia.calcular(resultados)

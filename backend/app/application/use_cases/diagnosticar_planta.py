@@ -14,36 +14,8 @@ class DiagnosticarPlanta:
         if referencia is None:
             raise ValueError("ESPECIE_NO_SOPORTADA")
 
-        humedad = self.evaluador.evaluar_parametro(
-            "humedad",
-            medicion.humedad,
-            referencia.humedad_min,
-            referencia.humedad_max,
-            "%"
-        )
-
-        luz = self.evaluador.evaluar_parametro(
-            "luz",
-            medicion.luz,
-            referencia.luz_min,
-            referencia.luz_max,
-            "lux"
-        )
-
-        temperatura = self.evaluador.evaluar_parametro(
-            "temperatura",
-            medicion.temperatura,
-            referencia.temperatura_min,
-            referencia.temperatura_max,
-            "C"
-        )
-
-        parametros = [
-            humedad,
-            luz,
-            temperatura
-        ]
-
+        configuracion_parametros = referencia.obtener_parametros(medicion)
+        parametros = self.evaluador.evaluar_parametros(configuracion_parametros)
         estado = self.evaluador.calcular_indice(parametros)
 
         recomendaciones = []
