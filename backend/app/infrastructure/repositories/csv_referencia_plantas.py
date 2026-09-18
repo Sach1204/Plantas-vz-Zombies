@@ -1,9 +1,10 @@
 import csv
 
 from app.domain.entities.rango_referencia import RangoReferencia
+from app.domain.ports.referencia_plantas import ReferenciaPlantas
 
 
-class CSVReferenciaPlantas:
+class CSVReferenciaPlantas(ReferenciaPlantas):
 
     def __init__(self, ruta):
         self.ruta = ruta
