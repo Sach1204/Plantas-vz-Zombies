@@ -60,3 +60,70 @@ def test_api_diagnostica_plantas_con_get():
     data = response.get_json()
     assert data["especie"] == "sansevieria"
     assert data["estado"] == "EN_RIESGO"
+
+
+def test_api_rechaza_especie_desconocida():
+    app = create_app()
+
+    response = app.test_client().post(
+        "/api/v1/diagnosticos",
+        json={
+            "especie": "planta_inventada",
+            "humedad": 30,
+            "luz": 500,
+            "temperatura": 22,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.get_json()["error"] == "ESPECIE_NO_SOPORTADA"
+
+
+def test_api_rechaza_parametro_faltante():
+    app = create_app()
+
+    response = app.test_client().post(
+        "/api/v1/diagnosticos",
+        json={
+            "especie": "sansevieria",
+            "humedad": 30,
+            "luz": 500,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "DATOS_DE_ENTRADA_INVALIDOS"
+
+
+def test_api_rechaza_valor_no_numerico():
+    app = create_app()
+
+    response = app.test_client().post(
+        "/api/v1/diagnosticos",
+        json={
+            "especie": "sansevieria",
+            "humedad": "abc",
+            "luz": 500,
+            "temperatura": 22,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "DATOS_DE_ENTRADA_INVALIDOS"
+
+
+def test_api_rechaza_valor_fuera_de_rango_fisico():
+    app = create_app()
+
+    response = app.test_client().post(
+        "/api/v1/diagnosticos",
+        json={
+            "especie": "sansevieria",
+            "humedad": 30,
+            "luz": 500,
+            "temperatura": 200,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "VALOR_FUERA_DE_RANGO_FISICO"
