@@ -1,12 +1,5 @@
-from abc import ABC, abstractmethod
+from app.domain.ports.salida import TablaReferenciaPort
 
 
-class ReferenciaPlantas(ABC):
-
-    @abstractmethod
-    def obtener_por_especie(self, especie):
-        pass
-
-    @abstractmethod
-    def listar_especies(self):
-        pass
+class ReferenciaPlantas(TablaReferenciaPort):
+    pass

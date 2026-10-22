@@ -5,6 +5,11 @@ from app.domain.entities.medicion import Medicion
 from app.domain.entities.rango_referencia import RangoReferencia
 from app.domain.services.evaluador_planta import EvaluadorPlanta
 from app.domain.services.recomendador import Recomendador
+from app.domain.entities.lectura import Lectura
+from app.domain.entities.planta import Planta
+from app.domain.entities.especie import Especie
+from app.domain.exceptions import AccesoDenegado, DatoInvalido
+from app.domain.services.validador_de_estado import ValidadorDeEstado
 
 
 class FakeReferenciaPlantas:
@@ -108,3 +113,75 @@ def test_diagnostico_lanza_error_si_especie_no_soportada(referencia_sansevieria)
 
     with pytest.raises(ValueError, match="ESPECIE_NO_SOPORTADA"):
         diagnostico.ejecutar(Medicion("orquidea", 50, 500, 22))
+
+
+class FakeTablaReferencia:
+    def obtener_por_especie(self, especie):
+        if especie.nombre == "sansevieria":
+            return RangoReferencia("sansevieria", 30, 60, 300, 800, 18, 28)
+        return None
+
+    def listar_especies(self):
+        return [Especie("sansevieria")]
+
+
+def crear_lectura(humedad=45, luz=500, temperatura=22):
+    from datetime import datetime, timezone
+
+    return Lectura(
+        especie=Especie("sansevieria"),
+        humedad=humedad,
+        luz=luz,
+        temperatura=temperatura,
+        marca_temporal=datetime.now(timezone.utc),
+    )
+
+
+def test_dominio_lectura_en_rango_con_doble_de_tabla():
+    referencia = FakeTablaReferencia()
+    validador = ValidadorDeEstado(EvaluadorPlanta(), Recomendador())
+
+    resultado = validador.validar(
+        crear_lectura(),
+        referencia.obtener_por_especie(Especie("sansevieria")),
+    )
+
+    assert resultado.estado.value == "SALUDABLE"
+
+
+def test_dominio_lectura_fuera_de_rango_es_un_estado_valido():
+    referencia = FakeTablaReferencia()
+    validador = ValidadorDeEstado(EvaluadorPlanta(), Recomendador())
+
+    resultado = validador.validar(
+        crear_lectura(humedad=10),
+        referencia.obtener_por_especie(Especie("sansevieria")),
+    )
+
+    assert resultado.estado.value == "EN_RIESGO"
+    assert resultado.parametros[0].estado.value == "BAJO"
+
+
+@pytest.mark.parametrize(
+    ("campo", "valor"),
+    [("humedad", "abc"), ("humedad", 101), ("luz", float("nan"))],
+)
+def test_dominio_rechaza_lecturas_invalidas(campo, valor):
+    valores = {"humedad": 45, "luz": 500, "temperatura": 22}
+    valores[campo] = valor
+
+    with pytest.raises(DatoInvalido):
+        crear_lectura(**valores)
+
+
+def test_dominio_rechaza_lectura_de_planta_ajena():
+    planta = Planta(
+        id="planta-1",
+        nombre="Potos",
+        especie=Especie("potos"),
+        propietario_id="usuario-1",
+        dispositivo_id="esp32-1",
+    )
+
+    with pytest.raises(AccesoDenegado, match="PLANTA_NO_PERTENECE_AL_USUARIO"):
+        planta.asegurar_propietario("usuario-2")

@@ -1,7 +1,3 @@
-from enum import Enum
+from app.domain.entities.estado import Estado
 
-
-class IndiceVitalidad(Enum):
-    SALUDABLE = "SALUDABLE"
-    EN_RIESGO = "EN_RIESGO"
-    CRITICO = "CRITICO"
+IndiceVitalidad = Estado
