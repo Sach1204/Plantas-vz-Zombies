@@ -176,6 +176,19 @@ def test_tabla_referencia_sqlite_se_elige_por_configuracion(tmp_path):
         "/api/v1/especies",
         headers={"Authorization": f"Bearer {usuario['token']}"},
     )
+    planta = crear_planta(client, usuario["token"]).get_json()
+    lectura = client.post(
+        f"/api/v1/plantas/{planta['id']}/lecturas",
+        headers={"Authorization": f"Bearer {usuario['token']}"},
+        json={
+            "especie": "sansevieria",
+            "humedad": 0,
+            "luz": 700,
+            "temperatura": 22,
+        },
+    )
 
     assert response.status_code == 200
     assert "sansevieria" in response.get_json()["especies"]
+    assert lectura.status_code == 201
+    assert lectura.get_json()["estado"] == "EN_RIESGO"
