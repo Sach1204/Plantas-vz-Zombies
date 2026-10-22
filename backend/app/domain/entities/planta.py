@@ -13,7 +13,13 @@ class Planta:
     dispositivo_id: str
 
     def __post_init__(self):
-        if not all((self.id, self.nombre.strip(), self.propietario_id, self.dispositivo_id)):
+        if (
+            not isinstance(self.nombre, str)
+            or not isinstance(self.id, str)
+            or not isinstance(self.propietario_id, str)
+            or not isinstance(self.dispositivo_id, str)
+            or not all((self.id, self.nombre.strip(), self.propietario_id, self.dispositivo_id))
+        ):
             raise DatoInvalido("PLANTA_INVALIDA")
         if isinstance(self.especie, str):
             object.__setattr__(self, "especie", Especie(self.especie))

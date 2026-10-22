@@ -10,6 +10,7 @@ from app.domain.entities.planta import Planta
 from app.domain.entities.especie import Especie
 from app.domain.exceptions import AccesoDenegado, DatoInvalido
 from app.domain.services.validador_de_estado import ValidadorDeEstado
+from app.application.use_cases.registrar_lectura import RegistrarLectura
 
 
 class FakeReferenciaPlantas:
@@ -185,3 +186,36 @@ def test_dominio_rechaza_lectura_de_planta_ajena():
 
     with pytest.raises(AccesoDenegado, match="PLANTA_NO_PERTENECE_AL_USUARIO"):
         planta.asegurar_propietario("usuario-2")
+
+
+def test_caso_uso_no_guarda_lectura_de_planta_ajena():
+    planta = Planta(
+        id="planta-1",
+        nombre="Potos",
+        especie=Especie("sansevieria"),
+        propietario_id="usuario-1",
+        dispositivo_id="esp32-1",
+    )
+
+    class FakePlantas:
+        def obtener(self, planta_id):
+            return planta
+
+    class FakeHistorial:
+        guardada = False
+
+        def guardar(self, lectura):
+            self.guardada = True
+
+    historial = FakeHistorial()
+    caso_uso = RegistrarLectura(
+        FakePlantas(),
+        FakeTablaReferencia(),
+        historial,
+        ValidadorDeEstado(EvaluadorPlanta(), Recomendador()),
+    )
+
+    with pytest.raises(AccesoDenegado):
+        caso_uso.ejecutar(crear_lectura(), usuario_id="usuario-2")
+
+    assert not historial.guardada
