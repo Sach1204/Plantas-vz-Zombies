@@ -28,6 +28,7 @@ from app.infrastructure.repositories.sqlite_usuarios import SQLiteUsuarios
 from app.infrastructure.security.jwt_tokens import JwtTokenService
 from app.infrastructure.security.password_hasher import WerkzeugHashContrasenas
 from app.presentation.controllers.api_front import api_front_bp
+from app.presentation.controllers.api_dispositivos import api_dispositivos_bp
 from app.presentation.errors import configurar_manejadores_errores
 
 
@@ -102,6 +103,7 @@ def create_app(configuracion=None):
         ),
     }
     app.register_blueprint(api_front_bp)
+    app.register_blueprint(api_dispositivos_bp)
     configurar_manejadores_errores(app)
 
     return app
