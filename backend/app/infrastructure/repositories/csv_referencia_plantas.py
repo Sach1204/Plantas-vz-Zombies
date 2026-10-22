@@ -10,12 +10,13 @@ class CSVReferenciaPlantas(ReferenciaPlantas):
         self.ruta = ruta
 
     def obtener_por_especie(self, especie):
+        nombre = getattr(especie, "nombre", especie)
 
         with open(self.ruta, newline="", encoding="utf-8") as archivo:
             lector = csv.DictReader(archivo)
 
             for fila in lector:
-                if fila["especie"].lower() == especie.lower():
+                if fila["especie"].lower() == nombre.lower():
                     return RangoReferencia(
                         fila["especie"],
                         float(fila["humedad_min"]),
