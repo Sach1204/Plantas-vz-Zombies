@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from app.domain.entities.usuario_id import UsuarioId
+
 
 class TablaReferenciaPort(ABC):
     @abstractmethod
@@ -35,7 +37,7 @@ class PlantasPort(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def listar_por_usuario(self, usuario_id):
+    def listar_por_usuario(self, usuario_id: UsuarioId):
         raise NotImplementedError
 
     @abstractmethod
@@ -55,7 +57,7 @@ class UsuariosPort(ABC):
 
 class EmisorTokenPort(ABC):
     @abstractmethod
-    def emitir_usuario(self, usuario_id):
+    def emitir_usuario(self, usuario_id: UsuarioId):
         raise NotImplementedError
 
     @abstractmethod

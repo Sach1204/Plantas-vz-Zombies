@@ -1,5 +1,6 @@
 from app.domain.entities.especie import Especie
 from app.domain.entities.planta import Planta
+from app.domain.entities.usuario_id import UsuarioId
 from app.domain.ports.salida import PlantasPort
 
 
@@ -53,6 +54,6 @@ class SQLitePlantas(PlantasPort):
             id=fila["id"],
             nombre=fila["nombre"],
             especie=Especie(fila["especie"]),
-            propietario_id=fila["propietario_id"],
+            propietario_id=UsuarioId(fila["propietario_id"]),
             dispositivo_id=fila["dispositivo_id"],
         )

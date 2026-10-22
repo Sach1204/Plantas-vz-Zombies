@@ -1,4 +1,5 @@
 from app.domain.entities.usuario import Usuario
+from app.domain.entities.usuario_id import UsuarioId
 from app.domain.ports.salida import UsuariosPort
 
 
@@ -15,7 +16,7 @@ class SQLiteUsuarios(UsuariosPort):
         if fila is None:
             return None
         return Usuario(
-            id=fila["id"],
+            id=UsuarioId(fila["id"]),
             email=fila["email"],
             hash_contrasena=fila["hash_contrasena"],
         )

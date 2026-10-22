@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.domain.entities.usuario import Usuario
+from app.domain.entities.usuario_id import UsuarioId
 from app.domain.exceptions import DatoInvalido
 
 
@@ -20,7 +21,7 @@ class RegistrarUsuario:
             raise DatoInvalido("USUARIO_YA_REGISTRADO")
 
         usuario = Usuario(
-            id=str(uuid4()),
+            id=UsuarioId(str(uuid4())),
             email=email,
             hash_contrasena=self.hash_contrasenas.generar(contrasena),
         )

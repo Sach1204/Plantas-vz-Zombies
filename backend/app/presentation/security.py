@@ -2,6 +2,7 @@ from functools import wraps
 
 from flask import current_app, g, jsonify, request
 
+from app.domain.entities.usuario_id import UsuarioId
 from app.infrastructure.security.jwt_tokens import TokenInvalido
 
 
@@ -13,7 +14,7 @@ def requiere_usuario(vista):
             return claims
         if "plantas:consultar" not in claims.get("scope", []):
             return jsonify({"error": "ALCANCE_INSUFICIENTE"}), 403
-        g.usuario_id = claims["sub"]
+        g.usuario_id = UsuarioId(claims["sub"])
         return vista(*args, **kwargs)
 
     return protegida

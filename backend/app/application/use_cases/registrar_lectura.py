@@ -6,6 +6,7 @@ from app.domain.exceptions import (
     DispositivoNoAutorizado,
     RecursoNoEncontrado,
 )
+from app.domain.entities.usuario_id import UsuarioId
 from app.domain.ports.entrada import RegistrarLecturaPort
 
 
@@ -16,7 +17,12 @@ class RegistrarLectura(RegistrarLecturaPort):
         self.historial = historial
         self.validador = validador
 
-    def ejecutar(self, lectura, usuario_id=None, dispositivo_id=None):
+    def ejecutar(
+        self,
+        lectura,
+        usuario_id: UsuarioId | None = None,
+        dispositivo_id=None,
+    ):
         if (usuario_id is None) == (dispositivo_id is None):
             raise DispositivoNoAutorizado("IDENTIDAD_REQUERIDA")
 

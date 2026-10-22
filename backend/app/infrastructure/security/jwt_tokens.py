@@ -18,7 +18,7 @@ class JwtTokenService(EmisorTokenPort):
     def emitir_usuario(self, usuario_id):
         return self._emitir(
             {
-                "sub": usuario_id,
+                "sub": str(usuario_id),
                 "tipo": "usuario",
                 "scope": ["plantas:consultar", "lecturas:registrar"],
             }

@@ -1,4 +1,5 @@
 from app.domain.exceptions import RecursoNoEncontrado
+from app.domain.entities.usuario_id import UsuarioId
 from app.domain.ports.entrada import ConsultarEstadoPort
 
 
@@ -9,7 +10,7 @@ class ConsultarEstado(ConsultarEstadoPort):
         self.historial = historial
         self.validador = validador
 
-    def ejecutar(self, planta_id, usuario_id):
+    def ejecutar(self, planta_id, usuario_id: UsuarioId):
         planta = self.plantas.obtener(planta_id)
         if planta is None:
             raise RecursoNoEncontrado("PLANTA_NO_ENCONTRADA")
