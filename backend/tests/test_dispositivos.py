@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+import jwt
 import pytest
 
 from app import create_app
@@ -77,6 +78,19 @@ def test_dispositivo_no_puede_usar_token_para_otro_dispositivo(entorno):
 
     assert response.status_code == 403
     assert front.status_code == 401
+
+
+def test_token_dispositivo_tiene_solo_alcance_de_reportar_y_dura_30_dias(entorno):
+    _, _, planta = entorno
+    claims = jwt.decode(
+        planta["token_dispositivo"],
+        options={"verify_signature": False},
+    )
+    tiempo_restante = claims["exp"] - int(datetime.now(timezone.utc).timestamp())
+
+    assert claims["tipo"] == "dispositivo"
+    assert claims["scope"] == ["lecturas:reportar"]
+    assert 29 * 24 * 60 * 60 < tiempo_restante <= 30 * 24 * 60 * 60
 
 
 @pytest.mark.parametrize(

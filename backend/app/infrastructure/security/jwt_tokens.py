@@ -14,6 +14,7 @@ class JwtTokenService(EmisorTokenPort):
     def __init__(self, secreto, duracion_minutos=60):
         self.secreto = secreto
         self.duracion = timedelta(minutes=duracion_minutos)
+        self.duracion_dispositivo = timedelta(days=30)
 
     def emitir_usuario(self, usuario_id):
         return self._emitir(
@@ -31,7 +32,8 @@ class JwtTokenService(EmisorTokenPort):
                 "tipo": "dispositivo",
                 "scope": ["lecturas:reportar"],
                 "planta_id": planta_id,
-            }
+            },
+            duracion=self.duracion_dispositivo,
         )
 
     def verificar(self, token, tipo):
@@ -48,11 +50,11 @@ class JwtTokenService(EmisorTokenPort):
             raise TokenInvalido("TIPO_DE_TOKEN_INVALIDO")
         return claims
 
-    def _emitir(self, claims):
+    def _emitir(self, claims, duracion=None):
         ahora = datetime.now(timezone.utc)
         payload = {
             **claims,
             "iat": ahora,
-            "exp": ahora + self.duracion,
+            "exp": ahora + (duracion or self.duracion),
         }
         return jwt.encode(payload, self.secreto, algorithm="HS256")
