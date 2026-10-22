@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from app import create_app
+from simulador_esp32 import generar_lectura
 
 
 @pytest.fixture
@@ -97,3 +98,11 @@ def test_adaptador_dispositivo_rechaza_lectura_invalida(entorno, valores):
         headers={"Authorization": f"Bearer {token_usuario}"},
     )
     assert historial.get_json()["lecturas"] == []
+
+
+def test_simulador_genera_caso_fuera_de_rango_y_dato_invalido():
+    fuera_de_rango = generar_lectura(5, "esp32-1", "sansevieria")
+    invalida = generar_lectura(7, "esp32-1", "sansevieria")
+
+    assert fuera_de_rango["humedad"] == 0
+    assert invalida["humedad"] == "dato-invalido"
