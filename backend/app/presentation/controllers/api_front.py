@@ -4,7 +4,7 @@ from flask import Blueprint, current_app, g, jsonify, request
 
 from app.domain.entities.especie import Especie
 from app.domain.entities.lectura import Lectura, OrigenLectura
-from app.domain.exceptions import DatoInvalido, RecursoNoEncontrado
+from app.domain.exceptions import DatoInvalido
 from app.presentation.security import requiere_usuario
 
 api_front_bp = Blueprint("api_front", __name__, url_prefix="/api/v1")
@@ -137,7 +137,13 @@ def consultar_estado(planta_id):
         g.usuario_id,
     )
     if diagnostico is None:
-        raise RecursoNoEncontrado("LECTURAS_NO_ENCONTRADAS")
+        return jsonify(
+            {
+                "estado": "SIN_LECTURAS",
+                "parametros": [],
+                "recomendaciones": [],
+            }
+        )
     return jsonify(_a_json_diagnostico(diagnostico))
 
 

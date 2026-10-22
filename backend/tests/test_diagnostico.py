@@ -72,7 +72,8 @@ def test_api_registra_y_consulta_lecturas_solo_del_propietario(client):
         f"/api/v1/plantas/{planta_id}/estado",
         headers=headers,
     )
-    assert sin_lecturas.status_code == 404
+    assert sin_lecturas.status_code == 200
+    assert sin_lecturas.get_json()["estado"] == "SIN_LECTURAS"
 
     lectura = client.post(
         f"/api/v1/plantas/{planta_id}/lecturas",

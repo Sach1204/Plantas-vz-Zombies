@@ -1,82 +1,99 @@
-# Plantas-vz-Zombies
+# Plantas vs Zombies
 
-Proyecto de diagnóstico de plantas con arquitectura en capas, API REST en Flask y frontend estático en HTML/CSS/JS.
+API Flask y aplicación web estática para registrar y consultar lecturas de plantas. El
+frontend se ejecuta por separado y consulta la API con `fetch`; no se renderiza desde
+Flask.
 
 ## Requisitos
 
-- Python 3.12+
-- Pip para instalar dependencias
-```powershell
-cd .\backend
-C:\Users\DANGUU\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
-```
+- Python 3.12 o superior
 - Navegador web moderno
-- PowerShell o WSL
-
-## Estructura principal
-
-- backend/: API Flask y lógica del dominio
-- frontend/: aplicación web estática
-- backend/tests/: pruebas unitarias del dominio y de integración
+- PowerShell en Windows (o una terminal equivalente)
 
 ## Ejecutar el backend
 
-Abre PowerShell en la carpeta del proyecto y ejecuta:
+En una terminal:
 
 ```powershell
 cd .\backend
-C:\Users\DANGUU\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
-C:\Users\DANGUU\AppData\Local\Programs\Python\Python312\python.exe run.py
+py -3.12 -m pip install -r .\requirements.txt
+$env:MATERA_JWT_SECRET = "cambia-esto-por-un-secreto-largo"
+py -3.12 .\run.py
 ```
 
-Esto levanta la API en:
+La API queda disponible en `http://127.0.0.1:5000`. La base SQLite guarda usuarios,
+plantas y lecturas en `backend/app/infrastructure/data/matera.sqlite3`. Define
+`MATERA_DATABASE_PATH` para usar otra ubicación. Si no se define
+`MATERA_JWT_SECRET`, se genera un secreto temporal al iniciar; configura uno estable
+para conservar la validez de los tokens entre reinicios.
 
-- http://127.0.0.1:5000
+La tabla de referencia se selecciona por configuración:
 
-Endpoints principales:
+```powershell
+$env:MATERA_REFERENCE_ADAPTER = "csv"
+```
 
-- GET /api/v1/especies
-- GET /api/v1/diagnosticos
-- POST /api/v1/diagnosticos
+Usa `"sqlite"` para leer la tabla de referencia desde SQLite. La primera ejecución en
+ese modo importa las especies del CSV actual si la tabla está vacía. Ambos adaptadores
+implementan el mismo puerto y la selección no cambia el dominio.
 
 ## Ejecutar el frontend
 
-Abre otra terminal y sirve la carpeta frontend con un servidor estático, por ejemplo:
+En otra terminal, desde la raíz del repositorio:
 
 ```powershell
 cd .\frontend
-python -m http.server 8000
+py -3.12 -m http.server 8000
 ```
 
-Luego abre en el navegador:
+Abre `http://127.0.0.1:8000`. Regístrate o inicia sesión, agrega una planta y elige su
+especie. El panel consulta automáticamente el estado y el historial cada cinco segundos.
+También permite guardar una lectura manual.
 
-- http://127.0.0.1:8000
+Al agregar una planta, copia el identificador y token del dispositivo: el token se muestra
+una sola vez y es independiente del token de usuario.
 
-El frontend consume la API del backend mediante fetch, sin recargar la página.
+## Ejecutar el simulador ESP32
 
-## Ejecutar pruebas unitarias del dominio
-
-Desde la carpeta backend:
+Con el backend encendido y una planta creada, abre una tercera terminal y proporciona las
+credenciales de dispositivo mostradas por el frontend:
 
 ```powershell
 cd .\backend
-C:\Users\DANGUU\AppData\Local\Programs\Python\Python312\python.exe -m pytest -q tests/test_dominio.py
+$env:MATERA_DEVICE_ID = "id-del-dispositivo"
+$env:MATERA_DEVICE_TOKEN = "token-del-dispositivo"
+py -3.12 .\simulador_esp32.py --interval 5 --especie sansevieria
 ```
 
-Resultado esperado:
+También admite `--device-id`, `--token`, `--api-url` y `--interval`; el intervalo debe ser
+mayor que cero. Cada quinto envío produce una humedad físicamente válida pero fuera del
+rango de referencia; cada séptimo envía un dato no numérico para comprobar que la API lo
+rechace con HTTP 400 sin guardarlo.
 
-- 7 pruebas pasando
+## Endpoints principales
 
-## Pruebas completas del backend
+- `POST /api/v1/auth/registro` y `POST /api/v1/auth/login`: autenticación de usuarios.
+- `GET /api/v1/especies`, `GET /api/v1/plantas` y `POST /api/v1/plantas`: requieren JWT
+  de usuario.
+- `GET /api/v1/plantas/{id}/estado` y `GET /api/v1/plantas/{id}/lecturas`: solo el
+  propietario puede consultar estado e historial.
+- `POST /api/v1/plantas/{id}/lecturas`: registra una lectura manual y requiere JWT de
+  usuario.
+- `POST /api/dispositivos/{id}/lecturas`: recibe lecturas del sensor y requiere un JWT de
+  dispositivo limitado a reportar para su planta.
+
+Un valor inválido (por ejemplo, humedad no numérica o fuera de los límites físicos) produce
+HTTP 400. Una lectura físicamente válida que queda fuera del rango recomendado de su
+especie se guarda y produce un estado como `EN_RIESGO` o `CRITICO`.
+
+## Pruebas
+
+Desde `backend`:
 
 ```powershell
-cd .\backend
-C:\Users\DANGUU\AppData\Local\Programs\Python\Python312\python.exe -m pytest -q
+py -3.12 -m pytest -q tests/test_dominio.py
+py -3.12 -m pytest -q
 ```
 
-## Observaciones
-
-- El backend responde exclusivamente JSON.
-- El frontend es cliente estático y separado.
-- Las pruebas del dominio no levantan el servidor web ni leen la fuente real de datos.
-- La validación de negocio usa una abstracción de referencia y dobles de prueba para aislar el dominio.
+Las pruebas de dominio invocan los casos de uso directamente con dobles de los puertos;
+no inician Flask ni requieren archivos o base de datos.

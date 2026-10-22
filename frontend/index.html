@@ -3,87 +3,150 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Plantas vs Zombies - Diagnóstico</title>
+    <title>Plantas vs Zombies - Monitor de plantas</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="page-shell">
       <header class="topbar">
         <div class="brand">
-          <span class="brand-mark">🌿</span>
+          <span class="brand-mark" aria-hidden="true">🌿</span>
           <span>Plantas vs Zombies</span>
         </div>
       </header>
 
       <main class="container">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Sistema de diagnóstico</p>
-            <h1>Evalúa el estado de tu planta</h1>
-            <p class="subtitle">
-              Ingresa los datos ambientales para obtener el estado, rangos y recomendaciones.
-            </p>
-          </div>
-        </section>
-
-        <section class="card">
-          <form id="diagnostico-form" class="form-grid">
+        <section id="auth-panel" class="card auth-card">
+          <p class="eyebrow">Tu jardín conectado</p>
+          <h1 id="auth-title">Inicia sesión</h1>
+          <p class="subtitle">Consulta tus plantas y sus lecturas desde cualquier lugar.</p>
+          <form id="auth-form" class="form-grid">
             <div class="field">
-              <label for="especie">Especie</label>
-              <select id="especie" name="especie" required>
-                <option value="">Selecciona una especie</option>
-              </select>
+              <label for="email">Correo</label>
+              <input id="email" name="email" type="email" autocomplete="email" required />
             </div>
-
             <div class="field">
-              <label for="humedad">Humedad (%)</label>
-              <input id="humedad" name="humedad" type="number" step="0.1" value="10" required />
+              <label for="contrasena">Contraseña</label>
+              <input
+                id="contrasena"
+                name="contrasena"
+                type="password"
+                autocomplete="current-password"
+                minlength="8"
+                required
+              />
             </div>
-
-            <div class="field">
-              <label for="luz">Luz (lux)</label>
-              <input id="luz" name="luz" type="number" step="0.1" value="500" required />
-            </div>
-
-            <div class="field">
-              <label for="temperatura">Temperatura (°C)</label>
-              <input id="temperatura" name="temperatura" type="number" step="0.1" value="20" required />
-            </div>
-
-            <button type="submit">Diagnosticar planta</button>
+            <button id="auth-submit" type="submit">Iniciar sesión</button>
           </form>
-
-          <p id="error-message" class="error-message hidden" aria-live="polite"></p>
+          <button id="auth-toggle" class="text-button" type="button">
+            ¿No tienes cuenta? Regístrate
+          </button>
+          <p id="auth-error" class="error-message hidden" aria-live="polite"></p>
         </section>
 
-        <section id="resultado" class="card resultado hidden">
-          <div class="resultado-header">
-            <h2>Resultado del diagnóstico</h2>
-            <span id="estado-badge" class="badge">--</span>
-          </div>
-
-          <div class="summary-grid">
+        <section id="dashboard" class="hidden">
+          <div class="dashboard-heading">
             <div>
-              <p class="label">Especie</p>
-              <p id="resultado-especie" class="value">-</p>
+              <p class="eyebrow">Panel de monitoreo</p>
+              <h1>Mis plantas</h1>
+              <p id="welcome-message" class="subtitle"></p>
             </div>
-            <div>
-              <p class="label">Estado general</p>
-              <p id="resultado-estado" class="value">-</p>
-            </div>
+            <button id="logout-button" class="secondary-button" type="button">Cerrar sesión</button>
           </div>
 
-          <div class="panel-grid">
-            <div class="panel">
-              <h3>Parámetros</h3>
-              <ul id="lista-parametros"></ul>
+          <section class="card">
+            <h2>Agregar planta</h2>
+            <form id="plant-form" class="form-grid">
+              <div class="field">
+                <label for="plant-name">Nombre</label>
+                <input id="plant-name" name="nombre" maxlength="80" required />
+              </div>
+              <div class="field">
+                <label for="plant-species">Especie</label>
+                <select id="plant-species" name="especie" required>
+                  <option value="">Selecciona una especie</option>
+                </select>
+              </div>
+              <button type="submit">Agregar planta</button>
+            </form>
+            <div id="device-credentials" class="device-credentials hidden" aria-live="polite">
+              <h3>Credenciales del dispositivo</h3>
+              <p>Guarda este token ahora; no volverá a mostrarse en el panel.</p>
+              <p><strong>ID:</strong> <code id="device-id"></code></p>
+              <p><strong>Token:</strong> <code id="device-token"></code></p>
+              <button id="copy-device-token" class="secondary-button" type="button">
+                Copiar token
+              </button>
+            </div>
+            <p id="dashboard-error" class="error-message hidden" aria-live="polite"></p>
+          </section>
+
+          <section class="card plant-selector">
+            <label for="plant-select">Planta seleccionada</label>
+            <select id="plant-select">
+              <option value="">Aún no tienes plantas</option>
+            </select>
+            <p id="poll-status" class="muted" aria-live="polite">Esperando lecturas...</p>
+          </section>
+
+          <section id="plant-details" class="card hidden">
+            <div class="resultado-header">
+              <div>
+                <h2 id="plant-title">Estado de la planta</h2>
+                <p id="last-reading" class="muted"></p>
+              </div>
+              <span id="estado-badge" class="badge">Sin lecturas</span>
             </div>
 
-            <div class="panel">
-              <h3>Recomendaciones</h3>
-              <ul id="lista-recomendaciones"></ul>
+            <div class="panel-grid">
+              <div class="panel">
+                <h3>Parámetros actuales</h3>
+                <ul id="lista-parametros"></ul>
+              </div>
+              <div class="panel">
+                <h3>Recomendaciones</h3>
+                <ul id="lista-recomendaciones"></ul>
+              </div>
             </div>
-          </div>
+
+            <section class="manual-section">
+              <h3>Registrar diagnóstico manual</h3>
+              <form id="manual-form" class="form-grid">
+                <div class="field">
+                  <label for="humedad">Humedad (%)</label>
+                  <input id="humedad" name="humedad" type="number" step="0.1" required />
+                </div>
+                <div class="field">
+                  <label for="luz">Luz (lux)</label>
+                  <input id="luz" name="luz" type="number" step="0.1" required />
+                </div>
+                <div class="field">
+                  <label for="temperatura">Temperatura (°C)</label>
+                  <input id="temperatura" name="temperatura" type="number" step="0.1" required />
+                </div>
+                <button type="submit">Guardar lectura manual</button>
+              </form>
+            </section>
+
+            <section class="history-section">
+              <h3>Historial de lecturas</h3>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Origen</th>
+                      <th>Humedad</th>
+                      <th>Luz</th>
+                      <th>Temperatura</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-rows"></tbody>
+                </table>
+              </div>
+              <p id="empty-history" class="muted">Aún no hay lecturas registradas.</p>
+            </section>
+          </section>
         </section>
       </main>
     </div>
