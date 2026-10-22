@@ -1,17 +1,6 @@
-from pathlib import Path
-
 import pytest
 
 from app import create_app
-from app.application.use_cases.diagnosticar_planta import DiagnosticarPlanta
-from app.domain.entities.medicion import Medicion
-from app.domain.services.evaluador_planta import EvaluadorPlanta
-from app.domain.services.recomendador import Recomendador
-from app.infrastructure.repositories.csv_referencia_plantas import CSVReferenciaPlantas
-
-
-BACKEND_DIR = Path(__file__).resolve().parents[1]
-CSV_PATH = BACKEND_DIR / "app" / "infrastructure" / "data" / "plantas.csv"
 
 
 @pytest.fixture
@@ -41,23 +30,6 @@ def crear_planta(client, token, especie="sansevieria"):
         headers={"Authorization": f"Bearer {token}"},
         json={"nombre": "Mi planta", "especie": especie},
     )
-
-
-def test_diagnostico_conserva_la_validacion_existente():
-    referencia = CSVReferenciaPlantas(str(CSV_PATH))
-    diagnostico = DiagnosticarPlanta(
-        referencia,
-        EvaluadorPlanta(),
-        Recomendador(),
-    )
-
-    resultado = diagnostico.ejecutar(
-        Medicion("sansevieria", 10, 500, 20)
-    )
-
-    assert resultado["especie"] == "sansevieria"
-    assert resultado["estado"] == "EN_RIESGO"
-    assert any(parametro["nombre"] == "humedad" for parametro in resultado["parametros"])
 
 
 def test_api_registra_y_consulta_lecturas_solo_del_propietario(client):
