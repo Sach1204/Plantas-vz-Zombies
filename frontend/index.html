@@ -3,154 +3,232 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Plantas vs Zombies - Monitor de plantas</title>
+    <meta name="theme-color" content="#f4f8f1" />
+    <title>Plantas vs Zombies · Monitor de plantas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">🌿</span>
-          <span>Plantas vs Zombies</span>
+    <section id="auth-panel" class="auth-layout">
+      <aside class="auth-story">
+        <a class="brand brand-light" href="#" aria-label="Plantas vs Zombies, inicio">
+          <span class="brand-icon">✿</span>
+          <span>Plantas <span class="brand-accent">vs</span> Zombies</span>
+        </a>
+        <div class="story-copy">
+          <span class="eyebrow">Tu jardín, más vivo</span>
+          <h1>Un pequeño cuidado hace crecer grandes cosas.</h1>
+          <p>Conoce el estado de tus plantas y acompáñalas día a día.</p>
         </div>
-      </header>
+        <div class="sunflower-art" aria-hidden="true">
+          <span class="art-sun">☀</span>
+          <span class="art-flower">🌻</span>
+          <span class="art-leaf art-leaf-one"></span>
+          <span class="art-leaf art-leaf-two"></span>
+        </div>
+        <div class="auth-decoration" aria-hidden="true">✳　✿　❋</div>
+      </aside>
 
-      <main class="container">
-        <section id="auth-panel" class="card auth-card">
-          <p class="eyebrow">Tu jardín conectado</p>
-          <h1 id="auth-title">Inicia sesión</h1>
-          <p class="subtitle">Consulta tus plantas y sus lecturas desde cualquier lugar.</p>
-          <form id="auth-form" class="form-grid">
-            <div class="field">
-              <label for="email">Correo</label>
-              <input id="email" name="email" type="email" autocomplete="email" required />
-            </div>
-            <div class="field">
-              <label for="contrasena">Contraseña</label>
-              <input
-                id="contrasena"
-                name="contrasena"
-                type="password"
-                autocomplete="current-password"
-                minlength="8"
-                required
-              />
-            </div>
-            <button id="auth-submit" type="submit">Iniciar sesión</button>
-          </form>
-          <button id="auth-toggle" class="text-button" type="button">
-            ¿No tienes cuenta? Regístrate
-          </button>
-          <p id="auth-error" class="error-message hidden" aria-live="polite"></p>
-        </section>
+      <main class="auth-main">
+        <div class="auth-mobile-brand brand">
+          <span class="brand-icon">✿</span>
+          <span>Plantas <span class="brand-accent">vs</span> Zombies</span>
+        </div>
+        <div class="auth-card">
+          <div class="auth-avatar" aria-hidden="true">🌱</div>
+          <span class="eyebrow">Bienvenido a tu jardín</span>
+          <h2 id="auth-title">Qué bueno verte</h2>
+          <p id="auth-subtitle" class="auth-subtitle">Inicia sesión para ver cómo están tus plantas.</p>
 
-        <section id="dashboard" class="hidden">
-          <div class="dashboard-heading">
-            <div>
-              <p class="eyebrow">Panel de monitoreo</p>
-              <h1>Mis plantas</h1>
-              <p id="welcome-message" class="subtitle"></p>
-            </div>
-            <button id="logout-button" class="secondary-button" type="button">Cerrar sesión</button>
+          <div class="auth-tabs" role="tablist" aria-label="Acceso">
+            <button id="login-tab" class="auth-tab is-active" type="button" role="tab" aria-selected="true">
+              Iniciar sesión
+            </button>
+            <button id="register-tab" class="auth-tab" type="button" role="tab" aria-selected="false">
+              Crear cuenta
+            </button>
           </div>
 
-          <section class="card">
-            <h2>Agregar planta</h2>
-            <form id="plant-form" class="form-grid">
-              <div class="field">
-                <label for="plant-name">Nombre</label>
-                <input id="plant-name" name="nombre" maxlength="80" required />
-              </div>
-              <div class="field">
-                <label for="plant-species">Especie</label>
-                <select id="plant-species" name="especie" required>
-                  <option value="">Selecciona una especie</option>
-                </select>
-              </div>
-              <button type="submit">Agregar planta</button>
-            </form>
-            <div id="device-credentials" class="device-credentials hidden" aria-live="polite">
-              <h3>Credenciales del dispositivo</h3>
-              <p>Guarda este token ahora; no volverá a mostrarse en el panel.</p>
-              <p><strong>ID:</strong> <code id="device-id"></code></p>
-              <p><strong>Token:</strong> <code id="device-token"></code></p>
-              <button id="copy-device-token" class="secondary-button" type="button">
-                Copiar token
-              </button>
+          <form id="auth-form" class="stack-form">
+            <label id="name-field" class="field hidden" for="auth-name">
+              Nombre
+              <span class="input-wrap"><span aria-hidden="true">♙</span><input id="auth-name" name="nombre" autocomplete="name" placeholder="¿Cómo te llamas?" /></span>
+            </label>
+            <label class="field" for="email">
+              Correo electrónico
+              <span class="input-wrap"><span aria-hidden="true">✉</span><input id="email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required /></span>
+            </label>
+            <label class="field" for="contrasena">
+              Contraseña
+              <span class="input-wrap"><span aria-hidden="true">⌑</span><input id="contrasena" name="contrasena" type="password" autocomplete="current-password" minlength="8" placeholder="Mínimo 8 caracteres" required /><button id="toggle-password" class="password-toggle" type="button" aria-label="Mostrar contraseña">◉</button></span>
+            </label>
+            <label id="confirm-field" class="field hidden" for="confirm-password">
+              Confirmar contraseña
+              <span class="input-wrap"><span aria-hidden="true">⌑</span><input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" placeholder="Repite tu contraseña" /></span>
+            </label>
+            <div id="login-options" class="login-options">
+              <label class="check-field"><input id="remember-me" type="checkbox" /> Recuérdame</label>
+              <button id="forgot-password" class="link-button" type="button">¿Olvidaste tu contraseña?</button>
             </div>
-            <p id="dashboard-error" class="error-message hidden" aria-live="polite"></p>
+            <button id="auth-submit" class="button button-primary button-wide" type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
+          </form>
+          <p id="auth-error" class="form-message hidden" aria-live="polite"></p>
+          <p class="auth-terms">Al continuar, aceptas cuidar tus plantas con mucho cariño. 🌿</p>
+        </div>
+        <p class="auth-footer">© 2026 Plantas vs Zombies · Cultiva algo bueno</p>
+      </main>
+    </section>
+
+    <div id="app-shell" class="app-shell hidden">
+      <aside id="sidebar" class="sidebar">
+        <a class="brand sidebar-brand" href="#" data-view-link="dashboard">
+          <span class="brand-icon">✿</span>
+          <span>Plantas<span class="brand-accent">vs</span>Zombies<small>MONITOR DE PLANTAS</small></span>
+        </a>
+        <div class="garden-label">TU JARDÍN</div>
+        <nav class="side-nav" aria-label="Navegación principal">
+          <button class="nav-link is-active" data-view-link="dashboard" type="button"><span>▦</span>Panel de control</button>
+          <button class="nav-link" data-view-link="plants" type="button"><span>♧</span>Mis plantas <span id="nav-plant-count" class="nav-count">0</span></button>
+          <button class="nav-link" data-view-link="alerts" type="button"><span>♧</span>Alertas <span id="nav-alert-count" class="nav-count alert-count hidden">0</span></button>
+          <button class="nav-link" data-view-link="history" type="button"><span>◷</span>Historial</button>
+          <button class="nav-link" data-view-link="shared" type="button"><span>♧</span>Cuidado compartido</button>
+        </nav>
+        <div class="garden-label nav-spacer">PREFERENCIAS</div>
+        <nav class="side-nav">
+          <button class="nav-link" data-view-link="settings" type="button"><span>⚙</span>Configuración</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-tip"><span class="tip-sun">☀</span><strong>Un consejo verde</strong><p>Las plantas también agradecen un poquito de luz cada día.</p></div>
+          <button id="sidebar-profile" class="profile-mini" data-view-link="settings" type="button"><span class="avatar">J</span><span><strong id="sidebar-user">Jardinero</strong><small>Mi jardín</small></span><span class="profile-dots">···</span></button>
+        </div>
+      </aside>
+
+      <main class="main-shell">
+        <header class="mobile-header">
+          <button id="menu-toggle" class="icon-button menu-toggle" type="button" aria-label="Abrir menú">☰</button>
+          <a class="brand" href="#" data-view-link="dashboard"><span class="brand-icon">✿</span><span>Plantas <span class="brand-accent">vs</span> Zombies</span></a>
+          <button class="icon-button mobile-bell" data-view-link="alerts" type="button" aria-label="Ver alertas">♧</button>
+        </header>
+        <header class="top-header">
+          <div class="breadcrumb"><span>Jardín</span><span aria-hidden="true">/</span><strong id="breadcrumb-current">Panel de control</strong></div>
+          <div class="header-actions">
+            <label class="search-box"><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Buscar planta..." aria-label="Buscar planta" /><kbd>⌘ K</kbd></label>
+            <div class="notification-wrap">
+              <button id="notification-button" class="icon-button notification-button" type="button" aria-label="Notificaciones">♧<i id="notification-dot" class="notification-dot hidden"></i></button>
+              <section id="notification-popover" class="notification-popover hidden" aria-label="Notificaciones recientes">
+                <div class="popover-heading"><strong>Notificaciones</strong><button class="link-button" data-view-link="alerts" type="button">Ver todas</button></div>
+                <div id="popover-alerts"></div>
+              </section>
+            </div>
+            <button class="user-menu" data-view-link="settings" type="button"><span class="avatar">J</span><span id="header-user">Jardinero</span><span aria-hidden="true">⌄</span></button>
+          </div>
+        </header>
+
+        <div id="app-content" class="app-content">
+          <p id="global-error" class="form-message global-error hidden" role="alert"></p>
+          <section class="view is-visible" data-view="dashboard">
+            <div class="page-heading dashboard-title-row">
+                <div><span id="today-date" class="eyebrow"></span><h1>Panel del Jardín <span class="heading-sparkle">✳</span></h1><p class="page-subtitle">¡Hola, <strong id="greeting-name">Jardinero</strong>! Así está creciendo tu jardín.</p></div>
+              <button class="button button-primary add-plant-button" data-action="open-add-plant" type="button"><span>＋</span> Agregar planta</button>
+            </div>
+            <div class="garden-banner">
+              <span class="banner-plant" aria-hidden="true">🌱</span>
+              <div><strong id="garden-summary">¡Tu jardín está a salvo!</strong><p id="garden-subsummary">Agrega tu primera planta y empieza a cuidarla.</p></div>
+              <span class="banner-creature" aria-hidden="true">🌻</span>
+              <span class="banner-sparkle" aria-hidden="true">✦</span>
+            </div>
+            <div id="stats-grid" class="stats-grid"></div>
+            <div class="section-heading plant-section-heading">
+              <div><span class="eyebrow">CRECEN CONTIGO</span><h2>Mis plantas <span id="plant-total" class="count-pill">0</span></h2></div>
+              <div class="section-actions"><div id="dashboard-filters" class="filter-chips"><button class="filter-chip is-active" data-filter="Todas" type="button">Todas</button><button class="filter-chip" data-filter="SALUDABLE" type="button">Saludables</button><button class="filter-chip" data-filter="EN_RIESGO" type="button">En riesgo</button><button class="filter-chip" data-filter="CRITICO" type="button">Críticas</button><button class="filter-chip" data-filter="DESCONECTADA" type="button">Desconectadas</button></div><button class="link-button see-all" data-view-link="plants" type="button">Ver todas <span>→</span></button></div>
+            </div>
+            <div id="plant-grid" class="plant-grid"></div>
+            <div id="dashboard-empty" class="empty-state hidden"><span class="empty-illustration">🪴</span><h3>Tu jardín empieza con una semilla</h3><p>Agrega una planta para ver sus cuidados y lecturas aquí.</p><button class="button button-primary" data-action="open-add-plant" type="button">＋ Agregar planta</button></div>
+            <section class="lower-grid"><article class="surface recent-panel"><div class="section-heading compact"><div><span class="eyebrow">AL DÍA</span><h2>Actividad reciente</h2></div><button class="link-button" data-view-link="alerts" type="button">Ver actividad →</button></div><div id="recent-activity" class="activity-list"></div></article><article class="surface care-card"><span class="care-icon">🌤️</span><div><span class="eyebrow">UN MOMENTO PARA TU JARDÍN</span><h3>Las plantas felices empiezan con pequeños cuidados.</h3><p>Revisa sus lecturas y descubre qué necesitan hoy.</p><button class="text-link" data-view-link="plants" type="button">Visitar mis plantas <span>→</span></button></div></article></section>
           </section>
 
-          <section class="card plant-selector">
-            <label for="plant-select">Planta seleccionada</label>
-            <select id="plant-select">
-              <option value="">Aún no tienes plantas</option>
-            </select>
-            <p id="poll-status" class="muted" aria-live="polite">Esperando lecturas...</p>
+          <section class="view" data-view="plants">
+            <div class="page-heading"><div><span class="eyebrow">TU COLECCIÓN</span><h1>Mis plantas</h1><p class="page-subtitle">Todas tus compañeras verdes, reunidas en un solo lugar.</p></div><button class="button button-primary" data-action="open-add-plant" type="button">＋ Agregar planta</button></div>
+            <div class="plants-toolbar surface"><label class="search-box"><span>⌕</span><input id="plant-search" type="search" placeholder="Buscar por nombre o especie..." /></label><div id="plants-filters" class="filter-chips"><button class="filter-chip is-active" data-filter="Todas" type="button">Todas</button><button class="filter-chip" data-filter="SALUDABLE" type="button">Saludables</button><button class="filter-chip" data-filter="EN_RIESGO" type="button">En riesgo</button><button class="filter-chip" data-filter="CRITICO" type="button">Críticas</button><button class="filter-chip" data-filter="DESCONECTADA" type="button">Desconectadas</button></div></div>
+            <div id="all-plants-grid" class="plant-grid"></div>
           </section>
 
-          <section id="plant-details" class="card hidden">
-            <div class="resultado-header">
-              <div>
-                <h2 id="plant-title">Estado de la planta</h2>
-                <p id="last-reading" class="muted"></p>
-              </div>
-              <span id="estado-badge" class="badge">Sin lecturas</span>
+          <section class="view" data-view="detail">
+            <button class="back-link" data-view-link="plants" type="button">← Volver a mis plantas</button>
+            <div id="connection-banner" class="connection-banner"></div>
+            <div class="detail-hero surface">
+              <span id="detail-plant-art" class="detail-plant-art" aria-hidden="true">🪴</span>
+              <div class="detail-identity"><span class="eyebrow">DETALLE DE PLANTA</span><h1 id="detail-title">Tu planta</h1><p id="detail-species" class="page-subtitle"></p><div id="detail-connection" class="connection-label"></div></div>
+              <div id="detail-state" class="state-hero"></div>
+              <button class="icon-button edit-plant-button" data-action="edit-plant" type="button" aria-label="Editar planta">✎</button>
             </div>
-
-            <div class="panel-grid">
-              <div class="panel">
-                <h3>Parámetros actuales</h3>
-                <ul id="lista-parametros"></ul>
-              </div>
-              <div class="panel">
-                <h3>Recomendaciones</h3>
-                <ul id="lista-recomendaciones"></ul>
-              </div>
-            </div>
-
-            <section class="manual-section">
-              <h3>Registrar diagnóstico manual</h3>
-              <form id="manual-form" class="form-grid">
-                <div class="field">
-                  <label for="humedad">Humedad (%)</label>
-                  <input id="humedad" name="humedad" type="number" step="0.1" required />
-                </div>
-                <div class="field">
-                  <label for="luz">Luz (lux)</label>
-                  <input id="luz" name="luz" type="number" step="0.1" required />
-                </div>
-                <div class="field">
-                  <label for="temperatura">Temperatura (°C)</label>
-                  <input id="temperatura" name="temperatura" type="number" step="0.1" required />
-                </div>
-                <button type="submit">Guardar lectura manual</button>
-              </form>
-            </section>
-
-            <section class="history-section">
-              <h3>Historial de lecturas</h3>
-              <div class="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Origen</th>
-                      <th>Humedad</th>
-                      <th>Luz</th>
-                      <th>Temperatura</th>
-                    </tr>
-                  </thead>
-                  <tbody id="history-rows"></tbody>
-                </table>
-              </div>
-              <p id="empty-history" class="muted">Aún no hay lecturas registradas.</p>
-            </section>
+            <nav class="detail-tabs" aria-label="Secciones de la planta"><button class="detail-tab is-active" data-detail-tab="overview" type="button">Resumen</button><button class="detail-tab" data-detail-tab="history" type="button">Historial</button><button class="detail-tab" data-detail-tab="shared" type="button">Cuidado compartido</button></nav>
+            <div class="detail-layout"><div class="detail-main">
+              <section class="detail-section"><div class="section-heading compact"><div><span class="eyebrow">ÚLTIMA LECTURA</span><h2>Parámetros de hoy</h2></div><span id="detail-reading-time" class="muted"></span></div><div id="metric-gauges" class="metric-gauges"></div></section>
+              <section class="detail-section surface recommendation-surface"><div class="section-heading compact"><div><span class="eyebrow">UN POQUITO DE AYUDA</span><h2>Recomendaciones</h2></div><span class="recommendation-sparkle">✦</span></div><ul id="detail-recommendations" class="recommendation-list"></ul></section>
+              <section class="detail-section surface chart-surface"><div class="section-heading compact"><div><span class="eyebrow">ASÍ VA CRECIENDO</span><h2>Últimas 24 horas</h2></div><button class="link-button" data-view-link="history" type="button">Ver historial →</button></div><div id="mini-chart" class="chart-container"></div></section>
+              <section class="detail-section surface manual-teaser"><span class="manual-icon">✎</span><div><h3>¿Quieres agregar una lectura?</h3><p>Registra los valores de tu planta manualmente.</p></div><button class="button button-secondary" data-view-link="manual" type="button">Añadir lectura</button></section>
+            </div><aside class="detail-aside surface"><span class="eyebrow">ACERCA DE ESTA PLANTA</span><div class="plant-info-row"><span>Especie</span><strong id="about-species"></strong></div><div class="plant-info-row"><span>Dispositivo</span><strong id="about-device"></strong></div><div class="plant-info-row"><span>Lecturas guardadas</span><strong id="about-readings"></strong></div><div class="aside-divider"></div><button class="aside-action" data-view-link="shared" type="button">♧ Compartir cuidado <span>→</span></button><button class="aside-action" data-action="open-add-plant" type="button">＋ Agregar otra planta <span>→</span></button></aside></div>
           </section>
-        </section>
+
+          <section class="view" data-view="history">
+            <div class="page-heading"><div><span class="eyebrow">OBSERVA CÓMO CRECE</span><h1>Historial de lecturas</h1><p class="page-subtitle">Tus mediciones y cambios, siempre a mano.</p></div><button id="export-history" class="button button-secondary" type="button">⇩ Exportar CSV</button></div>
+            <div class="history-controls surface"><label class="field-inline">Planta<select id="history-plant"></select></label><div id="history-periods" class="filter-chips"><button class="filter-chip is-active" data-period="1" type="button">Hoy</button><button class="filter-chip" data-period="7" type="button">7 días</button><button class="filter-chip" data-period="30" type="button">30 días</button><button class="filter-chip" data-period="all" type="button">Todo</button></div><label class="field-inline">Origen<select id="history-source"><option value="all">Todos</option><option value="SENSOR">Sensor</option><option value="MANUAL">Manual</option></select></label></div>
+            <div id="history-summary" class="history-summary-grid"></div>
+            <section class="surface history-chart-section"><div class="section-heading compact"><div><span class="eyebrow">TENDENCIA</span><h2>Lecturas en el tiempo</h2></div><div class="chart-legend"><span><i class="legend-dot humidity"></i>Humedad</span><span><i class="legend-dot light"></i>Luz</span><span><i class="legend-dot temperature"></i>Temperatura</span></div></div><div id="history-chart" class="chart-container"></div><p class="chart-footnote">Cada serie se normaliza a su rango para comparar tendencias.</p></section>
+            <section class="surface history-table-section"><div class="section-heading compact"><div><span class="eyebrow">REGISTROS</span><h2>Lecturas guardadas</h2></div><span id="history-count" class="count-pill">0</span></div><div class="table-scroll"><table class="history-table"><thead><tr><th>Fecha y hora</th><th>Origen</th><th>Humedad</th><th>Luz</th><th>Temperatura</th><th>Estado</th></tr></thead><tbody id="history-rows"></tbody></table></div><div id="history-empty" class="empty-inline hidden"><span>🪴</span><strong>Aún no hay lecturas</strong><p>Cuando tu planta reporte datos, aparecerán aquí.</p><button class="button button-secondary" data-view-link="manual" type="button">＋ Añadir lectura manual</button></div></section>
+          </section>
+
+          <section class="view" data-view="manual">
+            <button class="back-link" data-view-link="detail" type="button">← Volver al detalle</button><div id="manual-disconnected-banner" class="connection-banner disconnected"></div>
+            <div class="page-heading"><div><span class="eyebrow">CUIDADO A TU MANERA</span><h1>Diagnóstico manual</h1><p class="page-subtitle">Ingresa los valores que observas en tu planta.</p></div></div>
+            <div class="manual-layout"><form id="manual-form" class="surface manual-form-card"><div class="field"><label for="manual-species">Tipo de planta</label><select id="manual-species" required></select></div>
+              <div class="slider-field"><div class="slider-label"><label for="humedad">Humedad (%)</label><output id="humedad-output" for="humedad">45%</output></div><input id="humedad" name="humedad" type="range" min="0" max="100" step="1" value="45" /><div class="range-labels"><span>Seca</span><span>Ideal para tu planta</span><span>Húmeda</span></div><p id="humedad-validation" class="field-validation hidden"></p></div>
+              <div class="slider-field"><div class="slider-label"><label for="luz">Luz (lux)</label><output id="luz-output" for="luz">800 lux</output></div><input id="luz" name="luz" type="range" min="0" max="200000" step="10" value="800" /><div class="range-labels"><span>Sombra</span><span>Brillante</span></div><p id="luz-validation" class="field-validation hidden"></p></div>
+              <div class="slider-field"><div class="slider-label"><label for="temperatura">Temperatura (°C)</label><output id="temperatura-output" for="temperatura">22 °C</output></div><input id="temperatura" name="temperatura" type="range" min="-50" max="80" step="1" value="22" /><div class="range-labels"><span>Fría</span><span>Cálida</span></div><p id="temperatura-validation" class="field-validation hidden"></p></div>
+              <button class="button button-primary button-wide" type="submit">Calcular y guardar diagnóstico <span>→</span></button>
+            </form><section id="manual-result" class="surface manual-result-card"><div class="result-placeholder"><span class="empty-illustration">🌿</span><h2>Tu diagnóstico aparecerá aquí</h2><p>Ajusta los valores y calcula el estado de tu planta.</p></div></section></div>
+          </section>
+
+          <section class="view" data-view="shared">
+            <div class="page-heading"><div><span class="eyebrow">CUIDADO EN EQUIPO</span><h1>Cuidado compartido</h1><p class="page-subtitle">Invita a alguien a cuidar tu planta contigo.</p></div><button class="button button-primary" data-action="invite-collaborator" type="button">＋ Invitar a alguien</button></div>
+            <div class="shared-context surface"><span id="shared-plant-art" class="shared-plant-art">🪴</span><div><span class="eyebrow">PLANTA SELECCIONADA</span><h2 id="shared-plant-name">Elige una planta</h2><p id="shared-plant-species" class="muted"></p></div><select id="shared-plant-select" aria-label="Selecciona una planta"></select></div>
+            <div class="shared-grid"><section class="surface members-card"><div class="section-heading compact"><div><span class="eyebrow">QUIÉNES LA CUIDAN</span><h2>Equipo de cuidado</h2></div><span class="count-pill">1</span></div><div class="member-row"><span class="avatar">J</span><div><strong id="shared-owner-name">Jardinero</strong><small>Propietario · Tú</small></div><span class="owner-crown">♛</span></div><div class="collaboration-notice"><span>🌱</span><p>Las invitaciones y el acceso de colaboradores aún no están habilitados en la API. Tu planta sigue siendo privada y solo tú puedes verla.</p></div><button class="button button-secondary button-wide" data-action="invite-collaborator" type="button">Invitar a un cuidador <span>→</span></button></section><section class="surface shared-activity-card"><div class="section-heading compact"><div><span class="eyebrow">PEQUEÑOS CUIDADOS</span><h2>Actividad compartida</h2></div></div><div class="empty-inline"><span>💬</span><strong>Un jardín para cuidar en equipo</strong><p>Cuando compartir plantas esté disponible, aquí podrás registrar actividades y conversar con tus colaboradores.</p></div><div class="quick-actions"><button class="quick-action" data-action="care-unavailable" type="button">💧 Regada</button><button class="quick-action" data-action="care-unavailable" type="button">☀️ Cambiada de lugar</button></div></section></div>
+          </section>
+
+          <section class="view" data-view="alerts">
+            <div class="page-heading"><div><span class="eyebrow">TU JARDÍN TE AVISA</span><h1>Notificaciones</h1><p class="page-subtitle">Cambios de estado y lecturas recientes de tus plantas.</p></div><button id="mark-alerts-read" class="button button-secondary" type="button">Marcar todas como leídas</button></div>
+            <div class="alerts-toolbar surface"><div id="alert-filters" class="filter-chips"><button class="filter-chip is-active" data-alert-filter="all" type="button">Todas</button><button class="filter-chip" data-alert-filter="unread" type="button">Sin leer</button><button class="filter-chip" data-alert-filter="critical" type="button">Alertas</button></div><label class="field-inline">Planta<select id="alert-plant-filter"><option value="all">Todas las plantas</option></select></label></div>
+            <div id="alerts-list" class="alerts-list"></div><div id="alerts-empty" class="empty-state hidden"><span class="empty-illustration">🌼</span><h3>Todo tranquilo por aquí</h3><p>Cuando haya novedades, te avisaremos.</p></div>
+          </section>
+
+          <section class="view" data-view="settings">
+            <div class="page-heading"><div><span class="eyebrow">TU CUENTA Y TU JARDÍN</span><h1>Configuración</h1><p class="page-subtitle">Administra tu perfil y preferencias.</p></div></div>
+            <section class="surface settings-card"><div class="section-heading compact"><div><span class="eyebrow">PERFIL</span><h2>Tu cuenta</h2></div></div><div class="settings-profile"><span class="avatar avatar-large">J</span><div><strong id="settings-email"></strong><p>Cuenta de jardinero</p></div></div><div class="aside-divider"></div><div class="plant-info-row"><span>Frecuencia de actualización</span><strong>Cada 5 segundos</strong></div><div class="plant-info-row"><span>Plantas en tu jardín</span><strong id="settings-plant-count">0</strong></div><div class="aside-divider"></div><button id="logout-button" class="button button-danger" type="button">Cerrar sesión</button></section>
+          </section>
+        </div>
+        <footer class="app-footer"><span>Hecho para que tu jardín siga creciendo.</span><span>🌱</span></footer>
       </main>
     </div>
 
+    <dialog id="add-plant-dialog" class="modal-dialog">
+      <form id="add-plant-form" method="dialog" class="modal-card">
+        <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
+        <div class="modal-stepper"><span class="step is-current" data-step-indicator="1">1</span><i></i><span class="step" data-step-indicator="2">2</span><i></i><span class="step" data-step-indicator="3">3</span></div>
+        <div class="modal-step" data-step="1"><span class="eyebrow">NUEVA COMPAÑERA</span><h2>Agregar planta</h2><p>Cuéntanos un poquito sobre tu planta.</p><label class="field" for="new-plant-name">Nombre de tu planta<input id="new-plant-name" required maxlength="80" placeholder="Ej. Potos de la sala" /></label><label class="field" for="new-plant-species">Especie<select id="new-plant-species" required></select></label><button id="plant-next" class="button button-primary button-wide" type="button">Continuar <span>→</span></button></div>
+        <div class="modal-step hidden" data-step="2"><span class="eyebrow">PASO 2 · CONECTA TU SENSOR</span><h2>Vincular sensor ESP32</h2><p>Guarda estas credenciales para que el simulador pueda enviar lecturas.</p><div id="new-plant-credentials" class="credentials-panel hidden"><span class="eyebrow">ID DEL DISPOSITIVO</span><code id="new-device-id"></code><span class="eyebrow">TOKEN SECRETO · SE MUESTRA UNA SOLA VEZ</span><code id="new-device-token"></code><button id="copy-new-token" class="button button-secondary button-wide" type="button">Copiar token</button></div><div class="waiting-sensor"><span class="pulse-dot"></span><span id="sensor-waiting-label">Preparando el dispositivo…</span></div><button id="plant-finish" class="button button-primary button-wide" type="button">Continuar con valores manuales</button></div>
+        <div class="modal-step hidden" data-step="3"><span class="success-plant">✓</span><span class="eyebrow">TU JARDÍN CRECE</span><h2>¡Planta agregada!</h2><p id="plant-created-name"></p><p id="first-reading-status" class="muted">Cuando el sensor envíe su primera lectura, aparecerá automáticamente.</p><button id="plant-done" class="button button-primary button-wide" type="button">Ver mi planta <span>→</span></button></div>
+      </form>
+    </dialog>
+
+    <dialog id="notice-dialog" class="modal-dialog notice-dialog"><div class="modal-card"><button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button><span class="notice-icon">🌿</span><h2 id="notice-title">Aviso</h2><p id="notice-message"></p><button class="button button-primary button-wide" data-action="close-modal" type="button">Entendido</button></div></dialog>
+
+    <nav class="mobile-bottom-nav" aria-label="Navegación móvil"><button class="is-active" data-view-link="dashboard" type="button"><span>⌂</span>Inicio</button><button data-view-link="plants" type="button"><span>♧</span>Plantas</button><button data-view-link="alerts" type="button"><span>♧</span>Alertas</button><button data-view-link="settings" type="button"><span>⚙</span>Ajustes</button></nav>
     <script src="js/app.js"></script>
   </body>
 </html>

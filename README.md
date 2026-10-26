@@ -47,11 +47,20 @@ py -3.12 -m http.server 8000
 ```
 
 Abre `http://127.0.0.1:8000`. Regístrate o inicia sesión, agrega una planta y elige su
-especie. El panel consulta automáticamente el estado y el historial cada cinco segundos.
-También permite guardar una lectura manual.
+especie. La interfaz responsive incluye panel del jardín, colección con filtros, detalle
+por planta, gráficas e historial exportable, diagnóstico manual, notificaciones locales y
+configuración. El panel consulta automáticamente el estado y el historial cada cinco
+segundos.
 
-Al agregar una planta, copia el identificador y token del dispositivo: el token se muestra
-una sola vez y es independiente del token de usuario.
+El alta de planta usa un flujo de tres pasos. Copia y guarda el identificador y token del
+dispositivo cuando se muestran: el token aparece una sola vez y es independiente del token
+de usuario.
+
+El mockup también muestra invitaciones y cuidado compartido. La API de esta fase no
+implementa colaboradores ni invitaciones; esa pantalla informa la limitación y no simula
+un permiso que el backend no puede comprobar. Las alertas visibles se generan en este
+navegador cuando cambia el estado observado de una planta; no son notificaciones push del
+servidor.
 
 ## Ejecutar el simulador ESP32
 
