@@ -73,6 +73,16 @@ def registrar_usuario():
     ), 201
 
 
+@api_front_bp.post("/auth/recuperar-contrasena")
+def recuperar_contrasena():
+    data = _payload()
+    _servicios()["recuperar_contrasena"].ejecutar(
+        data.get("email"),
+        data.get("nueva_contrasena"),
+    )
+    return jsonify({"mensaje": "CONTRASENA_ACTUALIZADA"})
+
+
 @api_front_bp.post("/auth/login")
 def iniciar_sesion():
     data = _payload()
@@ -122,6 +132,7 @@ def listar_plantas():
                     "id": planta.id,
                     "nombre": planta.nombre,
                     "especie": planta.especie.nombre,
+                    "dispositivo_id": planta.dispositivo_id,
                 }
                 for planta in plantas
             ]
@@ -175,3 +186,93 @@ def registrar_lectura_manual(planta_id):
         usuario_id=g.usuario_id,
     )
     return jsonify(_a_json_diagnostico(diagnostico)), 201
+
+
+@api_front_bp.get("/plantas/<planta_id>/credenciales")
+@requiere_usuario
+def consultar_credenciales_planta(planta_id):
+    credenciales = _servicios()["obtener_credenciales_planta"].ejecutar(
+        planta_id,
+        g.usuario_id,
+    )
+    return jsonify(credenciales)
+
+
+@api_front_bp.put("/plantas/<planta_id>")
+@requiere_usuario
+def editar_planta(planta_id):
+    data = _payload()
+    planta = _servicios()["editar_planta"].ejecutar(
+        planta_id,
+        g.usuario_id,
+        nombre=data.get("nombre"),
+        especie=data.get("especie"),
+    )
+    return jsonify(
+        {
+            "id": planta.id,
+            "nombre": planta.nombre,
+            "especie": planta.especie.nombre,
+            "dispositivo_id": planta.dispositivo_id,
+        }
+    )
+
+
+@api_front_bp.delete("/plantas/<planta_id>")
+@requiere_usuario
+def eliminar_planta(planta_id):
+    _servicios()["eliminar_planta"].ejecutar(
+        planta_id,
+        g.usuario_id,
+    )
+    return jsonify({"eliminada": True})
+
+
+@api_front_bp.get("/plantas/<planta_id>/colaboradores")
+@requiere_usuario
+def listar_colaboradores(planta_id):
+    equipo = _servicios()["listar_equipo_cuidado"].ejecutar(
+        planta_id,
+        g.usuario_id,
+    )
+    return jsonify({"colaboradores": equipo})
+
+
+@api_front_bp.post("/plantas/<planta_id>/colaboradores")
+@requiere_usuario
+def invitar_colaborador(planta_id):
+    data = _payload()
+    email = data.get("email")
+    if not isinstance(email, str) or not email.strip():
+        raise DatoInvalido("EMAIL_INVALIDO")
+    colab = _servicios()["invitar_colaborador"].ejecutar(
+        planta_id,
+        g.usuario_id,
+        email,
+    )
+    return jsonify(colab), 201
+
+
+@api_front_bp.get("/plantas/<planta_id>/actividades")
+@requiere_usuario
+def listar_actividades(planta_id):
+    actividades = _servicios()["listar_actividades"].ejecutar(
+        planta_id,
+        g.usuario_id,
+    )
+    return jsonify({"actividades": actividades})
+
+
+@api_front_bp.post("/plantas/<planta_id>/actividades")
+@requiere_usuario
+def registrar_actividad(planta_id):
+    data = _payload()
+    accion = data.get("accion")
+    if not isinstance(accion, str) or not accion.strip():
+        raise DatoInvalido("ACCION_INVALIDA")
+    resultado = _servicios()["registrar_actividad"].ejecutar(
+        planta_id,
+        g.usuario_id,
+        accion,
+    )
+    return jsonify(resultado), 201

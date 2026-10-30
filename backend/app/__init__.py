@@ -8,9 +8,19 @@ from flask_cors import CORS
 from app.application.use_cases.consultar_estado import ConsultarEstado
 from app.application.use_cases.consultar_historial import ConsultarHistorial
 from app.application.use_cases.crear_planta import CrearPlanta
+from app.application.use_cases.editar_planta import EditarPlanta
+from app.application.use_cases.eliminar_planta import EliminarPlanta
+from app.application.use_cases.gestionar_colaboradores import (
+    InvitarColaborador,
+    ListarActividades,
+    ListarEquipoCuidado,
+    RegistrarActividad,
+)
 from app.application.use_cases.iniciar_sesion import IniciarSesion
 from app.application.use_cases.listar_especies import ListarEspecies
 from app.application.use_cases.listar_plantas import ListarPlantas
+from app.application.use_cases.obtener_credenciales_planta import ObtenerCredencialesPlanta
+from app.application.use_cases.recuperar_contrasena import RecuperarContrasena
 from app.application.use_cases.registrar_lectura import RegistrarLectura
 from app.application.use_cases.registrar_usuario import RegistrarUsuario
 from app.domain.services.evaluador_planta import EvaluadorPlanta
@@ -18,6 +28,7 @@ from app.domain.services.recomendador import Recomendador
 from app.domain.services.validador_de_estado import ValidadorDeEstado
 from app.infrastructure.database import SQLiteDatabase
 from app.infrastructure.repositories.csv_referencia_plantas import CSVReferenciaPlantas
+from app.infrastructure.repositories.sqlite_colaboradores import SQLiteColaboradores
 from app.infrastructure.repositories.sqlite_historial import SQLiteHistorialLecturas
 from app.infrastructure.repositories.sqlite_plantas import SQLitePlantas
 from app.infrastructure.repositories.sqlite_referencia import (
@@ -67,6 +78,7 @@ def create_app(configuracion=None):
     plantas = SQLitePlantas(base_datos)
     historial = SQLiteHistorialLecturas(base_datos)
     usuarios = SQLiteUsuarios(base_datos)
+    colaboradores = SQLiteColaboradores(base_datos)
     emisor_token = JwtTokenService(app.config["JWT_SECRET"])
     hash_contrasenas = WerkzeugHashContrasenas()
     validador = ValidadorDeEstado(EvaluadorPlanta(), Recomendador())
@@ -91,6 +103,14 @@ def create_app(configuracion=None):
         ),
         "consultar_historial": ConsultarHistorial(plantas, historial),
         "crear_planta": CrearPlanta(plantas, referencias, emisor_token),
+        "obtener_credenciales_planta": ObtenerCredencialesPlanta(plantas, emisor_token),
+        "editar_planta": EditarPlanta(plantas, referencias),
+        "eliminar_planta": EliminarPlanta(plantas),
+        "invitar_colaborador": InvitarColaborador(plantas, usuarios, colaboradores),
+        "listar_equipo_cuidado": ListarEquipoCuidado(plantas, usuarios, colaboradores),
+        "registrar_actividad": RegistrarActividad(plantas, colaboradores),
+        "listar_actividades": ListarActividades(plantas, usuarios, colaboradores),
+        "recuperar_contrasena": RecuperarContrasena(usuarios, hash_contrasenas),
         "registrar_usuario": RegistrarUsuario(
             usuarios,
             hash_contrasenas,
