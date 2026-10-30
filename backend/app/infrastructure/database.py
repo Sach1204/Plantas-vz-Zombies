@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS referencias (
 
 CREATE TABLE IF NOT EXISTS lecturas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    planta_id TEXT NOT NULL REFERENCES plantas(id),
+    planta_id TEXT NOT NULL REFERENCES plantas(id) ON DELETE CASCADE,
     dispositivo_id TEXT,
     marca_temporal TEXT NOT NULL,
     especie TEXT NOT NULL,
@@ -43,6 +43,22 @@ CREATE TABLE IF NOT EXISTS lecturas (
 
 CREATE INDEX IF NOT EXISTS idx_lecturas_planta_fecha
     ON lecturas(planta_id, marca_temporal DESC);
+
+CREATE TABLE IF NOT EXISTS colaboradores (
+    planta_id TEXT NOT NULL REFERENCES plantas(id) ON DELETE CASCADE,
+    usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    rol TEXT NOT NULL DEFAULT 'CUIDADOR',
+    creado_en TEXT NOT NULL,
+    PRIMARY KEY (planta_id, usuario_id)
+);
+
+CREATE TABLE IF NOT EXISTS actividades (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    planta_id TEXT NOT NULL REFERENCES plantas(id) ON DELETE CASCADE,
+    usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    accion TEXT NOT NULL,
+    marca_temporal TEXT NOT NULL
+);
 """
 
 

@@ -21,6 +21,20 @@ class SQLiteUsuarios(UsuariosPort):
             hash_contrasena=fila["hash_contrasena"],
         )
 
+    def obtener_por_id(self, usuario_id):
+        with self.base_datos.conectar() as conexion:
+            fila = conexion.execute(
+                "SELECT * FROM usuarios WHERE id = ?",
+                (str(usuario_id),),
+            ).fetchone()
+        if fila is None:
+            return None
+        return Usuario(
+            id=UsuarioId(fila["id"]),
+            email=fila["email"],
+            hash_contrasena=fila["hash_contrasena"],
+        )
+
     def guardar(self, usuario):
         with self.base_datos.conectar() as conexion:
             conexion.execute(
@@ -29,4 +43,11 @@ class SQLiteUsuarios(UsuariosPort):
                 VALUES (?, ?, ?)
                 """,
                 (usuario.id, usuario.email, usuario.hash_contrasena),
+            )
+
+    def actualizar_contrasena(self, email, hash_contrasena):
+        with self.base_datos.conectar() as conexion:
+            conexion.execute(
+                "UPDATE usuarios SET hash_contrasena = ? WHERE email = ?",
+                (hash_contrasena, email.strip().lower()),
             )

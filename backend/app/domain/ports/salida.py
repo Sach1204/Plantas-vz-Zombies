@@ -44,6 +44,14 @@ class PlantasPort(ABC):
     def obtener_por_dispositivo(self, dispositivo_id):
         raise NotImplementedError
 
+    @abstractmethod
+    def actualizar(self, planta):
+        raise NotImplementedError
+
+    @abstractmethod
+    def eliminar(self, planta_id):
+        raise NotImplementedError
+
 
 class UsuariosPort(ABC):
     @abstractmethod
@@ -51,7 +59,37 @@ class UsuariosPort(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def obtener_por_id(self, usuario_id: UsuarioId):
+        raise NotImplementedError
+
+    @abstractmethod
     def guardar(self, usuario):
+        raise NotImplementedError
+
+    @abstractmethod
+    def actualizar_contrasena(self, email, hash_contrasena):
+        raise NotImplementedError
+
+
+class ColaboradoresPort(ABC):
+    @abstractmethod
+    def agregar_colaborador(self, planta_id, usuario_id: UsuarioId, rol="CUIDADOR"):
+        raise NotImplementedError
+
+    @abstractmethod
+    def listar_colaboradores(self, planta_id):
+        raise NotImplementedError
+
+    @abstractmethod
+    def es_colaborador(self, planta_id, usuario_id: UsuarioId):
+        raise NotImplementedError
+
+    @abstractmethod
+    def registrar_actividad(self, planta_id, usuario_id: UsuarioId, accion, marca_temporal):
+        raise NotImplementedError
+
+    @abstractmethod
+    def listar_actividades(self, planta_id, limite=20):
         raise NotImplementedError
 
 

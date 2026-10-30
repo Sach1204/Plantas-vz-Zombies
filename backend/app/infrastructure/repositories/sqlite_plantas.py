@@ -48,6 +48,24 @@ class SQLitePlantas(PlantasPort):
             ).fetchone()
         return self._a_planta(fila) if fila else None
 
+    def actualizar(self, planta):
+        with self.base_datos.conectar() as conexion:
+            conexion.execute(
+                """
+                UPDATE plantas
+                SET nombre = ?, especie = ?
+                WHERE id = ?
+                """,
+                (planta.nombre.strip(), planta.especie.nombre, planta.id),
+            )
+
+    def eliminar(self, planta_id):
+        with self.base_datos.conectar() as conexion:
+            conexion.execute("DELETE FROM lecturas WHERE planta_id = ?", (planta_id,))
+            conexion.execute("DELETE FROM colaboradores WHERE planta_id = ?", (planta_id,))
+            conexion.execute("DELETE FROM actividades WHERE planta_id = ?", (planta_id,))
+            conexion.execute("DELETE FROM plantas WHERE id = ?", (planta_id,))
+
     @staticmethod
     def _a_planta(fila):
         return Planta(
