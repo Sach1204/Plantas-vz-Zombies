@@ -2652,33 +2652,127 @@ button:disabled {
 }
 
 .credentials-panel {
-  display: grid;
-  gap: 8px;
-  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid #dcebd7;
   border-radius: 12px;
   background: #f4faf0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .credentials-panel .eyebrow {
-  margin-top: 3px;
-  font-size: 8px;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
 }
 
-.credentials-panel code {
-  overflow-wrap: anywhere;
-  padding: 8px;
+.credential-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.credential-code-wrap {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 12px;
   border: 1px solid #e5eee1;
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 10px;
+  background: #f8fbf7;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Sin scroll: el token se parte en líneas automáticamente */
+.credential-code-wrap--scroll {
+  overflow: visible;
+}
+
+.credential-code-wrap--pre {
+  padding: 0;
+  background: #f8fbf7;
+}
+
+/* Todo el código hace wrap, sin barras de desplazamiento */
+.credential-code-wrap code {
+  display: block;
+  width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  white-space: pre-wrap;
+  font-size: 11px;
+  line-height: 1.65;
   color: #406347;
-  font-size: 10px;
   user-select: all;
+  box-sizing: border-box;
+}
+
+/* El snippet de config.h también hace wrap por línea */
+.credential-code-wrap--pre pre {
+  margin: 0;
+  padding: 12px;
+  overflow: visible;
+}
+
+.credential-code-wrap--pre code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .credentials-panel .button {
-  min-height: 35px;
-  font-size: 10px;
+  min-height: 38px;
+  font-size: 11px;
+}
+
+/* ── Credentials dialog (más ancho que el modal estándar, altura libre) ── */
+#credentials-dialog {
+  width: min(96vw, 560px);
+  max-width: 560px;
+  max-height: none;
+  overflow: visible;
+}
+
+#credentials-dialog .modal-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Asegurar que el código siempre sea verde (evitar herencia azul del browser) */
+.credential-code-wrap code,
+.credential-code-wrap--pre code {
+  color: #406347 !important;
+}
+
+/* Botones copy dentro del credentials-panel deben ser visibles siempre */
+.credentials-panel .button-secondary {
+  background: #f0f7ee;
+  color: #2d5535;
+  border: 1.5px solid #c5dcc0;
+}
+
+.credentials-panel .button-secondary:hover {
+  background: #e2f0de;
+}
+
+/* Feed de miembros y actividades */
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .waiting-sensor {

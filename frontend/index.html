@@ -173,7 +173,7 @@
               <section class="detail-section surface recommendation-surface"><div class="section-heading compact"><div><span class="eyebrow">UN POQUITO DE AYUDA</span><h2>Recomendaciones</h2></div><span class="recommendation-sparkle">✦</span></div><ul id="detail-recommendations" class="recommendation-list"></ul></section>
               <section class="detail-section surface chart-surface"><div class="section-heading compact"><div><span class="eyebrow">ASÍ VA CRECIENDO</span><h2>Últimas 24 horas</h2></div><button class="link-button" data-view-link="history" type="button">Ver historial →</button></div><div id="mini-chart" class="chart-container"></div></section>
               <section class="detail-section surface manual-teaser"><span class="manual-icon">✎</span><div><h3>¿Quieres agregar una lectura?</h3><p>Registra los valores de tu planta manualmente.</p></div><button class="button button-secondary" data-view-link="manual" type="button">Añadir lectura</button></section>
-            </div><aside class="detail-aside surface"><span class="eyebrow">ACERCA DE ESTA PLANTA</span><div class="plant-info-row"><span>Especie</span><strong id="about-species"></strong></div><div class="plant-info-row"><span>Dispositivo</span><strong id="about-device"></strong></div><div class="plant-info-row"><span>Lecturas guardadas</span><strong id="about-readings"></strong></div><div class="aside-divider"></div><button class="aside-action" data-view-link="shared" type="button">♧ Compartir cuidado <span>→</span></button><button class="aside-action" data-action="open-add-plant" type="button">＋ Agregar otra planta <span>→</span></button></aside></div>
+            </div><aside class="detail-aside surface"><span class="eyebrow">ACERCA DE ESTA PLANTA</span><div class="plant-info-row"><span>Especie</span><strong id="about-species"></strong></div><div class="plant-info-row"><span>Dispositivo</span><strong id="about-device"></strong></div><div class="plant-info-row"><span>Lecturas guardadas</span><strong id="about-readings"></strong></div><div class="aside-divider"></div><button class="aside-action" data-action="view-credentials" type="button">🔑 Credenciales ESP32 <span>→</span></button><button class="aside-action" data-view-link="shared" type="button">♧ Compartir cuidado <span>→</span></button><button class="aside-action" data-action="open-add-plant" type="button">＋ Agregar otra planta <span>→</span></button></aside></div>
           </section>
 
           <section class="view" data-view="history">
@@ -198,7 +198,24 @@
           <section class="view" data-view="shared">
             <div class="page-heading"><div><span class="eyebrow">CUIDADO EN EQUIPO</span><h1>Cuidado compartido</h1><p class="page-subtitle">Invita a alguien a cuidar tu planta contigo.</p></div><button class="button button-primary" data-action="invite-collaborator" type="button">＋ Invitar a alguien</button></div>
             <div class="shared-context surface"><span id="shared-plant-art" class="shared-plant-art">🪴</span><div><span class="eyebrow">PLANTA SELECCIONADA</span><h2 id="shared-plant-name">Elige una planta</h2><p id="shared-plant-species" class="muted"></p></div><select id="shared-plant-select" aria-label="Selecciona una planta"></select></div>
-            <div class="shared-grid"><section class="surface members-card"><div class="section-heading compact"><div><span class="eyebrow">QUIÉNES LA CUIDAN</span><h2>Equipo de cuidado</h2></div><span class="count-pill">1</span></div><div class="member-row"><span class="avatar">J</span><div><strong id="shared-owner-name">Jardinero</strong><small>Propietario · Tú</small></div><span class="owner-crown">♛</span></div><div class="collaboration-notice"><span>🌱</span><p>Las invitaciones y el acceso de colaboradores aún no están habilitados en la API. Tu planta sigue siendo privada y solo tú puedes verla.</p></div><button class="button button-secondary button-wide" data-action="invite-collaborator" type="button">Invitar a un cuidador <span>→</span></button></section><section class="surface shared-activity-card"><div class="section-heading compact"><div><span class="eyebrow">PEQUEÑOS CUIDADOS</span><h2>Actividad compartida</h2></div></div><div class="empty-inline"><span>💬</span><strong>Un jardín para cuidar en equipo</strong><p>Cuando compartir plantas esté disponible, aquí podrás registrar actividades y conversar con tus colaboradores.</p></div><div class="quick-actions"><button class="quick-action" data-action="care-unavailable" type="button">💧 Regada</button><button class="quick-action" data-action="care-unavailable" type="button">☀️ Cambiada de lugar</button></div></section></div>
+            <div class="shared-grid">
+              <section class="surface members-card">
+                <div class="section-heading compact"><div><span class="eyebrow">QUIÉNES LA CUIDAN</span><h2>Equipo de cuidado</h2></div><span id="shared-members-count" class="count-pill">1</span></div>
+                <div id="shared-members-list" class="members-list">
+                  <div class="member-row"><span class="avatar">J</span><div><strong id="shared-owner-name">Jardinero</strong><small>Propietario · Tú</small></div><span class="owner-crown">♛</span></div>
+                </div>
+                <button class="button button-secondary button-wide" data-action="invite-collaborator" type="button" style="margin-top: 15px;">Invitar a un cuidador <span>→</span></button>
+              </section>
+              <section class="surface shared-activity-card">
+                <div class="section-heading compact"><div><span class="eyebrow">PEQUEÑOS CUIDADOS</span><h2>Actividad compartida</h2></div><span id="shared-activity-count" class="count-pill">0</span></div>
+                <div id="shared-activity-list" class="activity-feed"></div>
+                <div id="shared-activity-empty" class="empty-inline"><span>💬</span><strong>Un jardín para cuidar en equipo</strong><p>Registra cuidados para que tu equipo sepa cómo va la planta.</p></div>
+                <div class="quick-actions">
+                  <button class="quick-action" data-care-action="💧 Regada" type="button">💧 Regada</button>
+                  <button class="quick-action" data-care-action="☀️ Cambiada de lugar" type="button">☀️ Cambiada de lugar</button>
+                </div>
+              </section>
+            </div>
           </section>
 
           <section class="view" data-view="alerts">
@@ -227,6 +244,96 @@
     </dialog>
 
     <dialog id="notice-dialog" class="modal-dialog notice-dialog"><div class="modal-card"><button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button><span class="notice-icon">🌿</span><h2 id="notice-title">Aviso</h2><p id="notice-message"></p><button class="button button-primary button-wide" data-action="close-modal" type="button">Entendido</button></div></dialog>
+
+    <dialog id="credentials-dialog" class="modal-dialog">
+      <div class="modal-card">
+        <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
+        <span class="notice-icon">🔑</span>
+        <span class="eyebrow">CONEXIÓN ESP32 / WOKWI</span>
+        <h2 id="cred-plant-title">Credenciales de la Planta</h2>
+        <p>Usa estos datos en tu simulador ESP32 o Wokwi para enviar lecturas en tiempo real.</p>
+        <div class="credentials-panel">
+          <div class="credential-block">
+            <span class="eyebrow">ID DEL DISPOSITIVO</span>
+            <div class="credential-code-wrap">
+              <code id="cred-device-id"></code>
+            </div>
+            <button id="copy-cred-id" class="button button-secondary button-wide" type="button">Copiar ID de Dispositivo</button>
+          </div>
+          
+          <div class="credential-block">
+            <span class="eyebrow">TOKEN JWT DEL DISPOSITIVO</span>
+            <div class="credential-code-wrap credential-code-wrap--scroll">
+              <code id="cred-device-token"></code>
+            </div>
+            <button id="copy-cred-token" class="button button-secondary button-wide" type="button">Copiar Token JWT</button>
+          </div>
+          
+          <div class="aside-divider"></div>
+          <div class="credential-block">
+            <span class="eyebrow">CONFIGURACIÓN LISTA PARA WOKWI (esp32/include/config.h)</span>
+            <div class="credential-code-wrap credential-code-wrap--pre">
+              <pre><code id="cred-config-snippet"></code></pre>
+            </div>
+            <button id="copy-cred-config" class="button button-primary button-wide" type="button">Copiar Bloque para config.h</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="edit-plant-dialog" class="modal-dialog">
+      <form id="edit-plant-form" method="dialog" class="modal-card">
+        <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
+        <span class="notice-icon">✏️</span>
+        <span class="eyebrow">GESTIÓN DE PLANTA</span>
+        <h2>Editar Planta</h2>
+        <label class="field" for="edit-plant-name">Nombre de la planta
+          <input id="edit-plant-name" required maxlength="80" />
+        </label>
+        <label class="field" for="edit-plant-species">Especie
+          <select id="edit-plant-species" required></select>
+        </label>
+        <p id="edit-plant-error" class="form-message hidden" aria-live="polite"></p>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button id="save-edit-plant" class="button button-primary button-wide" type="button">Guardar cambios</button>
+          <button id="delete-plant-button" class="button button-danger" type="button" title="Eliminar planta">🗑️</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="invite-dialog" class="modal-dialog">
+      <form id="invite-form" method="dialog" class="modal-card">
+        <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
+        <span class="notice-icon">💌</span>
+        <span class="eyebrow">CUIDADO COMPARTIDO</span>
+        <h2>Invitar a un cuidador</h2>
+        <p>Ingresa el correo electrónico de la persona que cuidará esta planta contigo.</p>
+        <label class="field" for="invite-email">Correo electrónico
+          <input id="invite-email" type="email" placeholder="amigo@correo.com" required />
+        </label>
+        <p id="invite-error" class="form-message hidden" aria-live="polite"></p>
+        <p id="invite-success" class="form-message success hidden" aria-live="polite"></p>
+        <button id="send-invite-button" class="button button-primary button-wide" type="button">Enviar invitación <span>→</span></button>
+      </form>
+    </dialog>
+
+    <dialog id="reset-password-dialog" class="modal-dialog">
+      <form id="reset-password-form" method="dialog" class="modal-card">
+        <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
+        <span class="notice-icon">🔑</span>
+        <span class="eyebrow">RECUPERAR ACCESO</span>
+        <h2>Restablecer contraseña</h2>
+        <label class="field" for="reset-email">Correo electrónico
+          <input id="reset-email" type="email" placeholder="tu@correo.com" required />
+        </label>
+        <label class="field" for="reset-new-password">Nueva contraseña
+          <input id="reset-new-password" type="password" minlength="8" placeholder="Mínimo 8 caracteres" required />
+        </label>
+        <p id="reset-error" class="form-message hidden" aria-live="polite"></p>
+        <p id="reset-success" class="form-message success hidden" aria-live="polite"></p>
+        <button id="submit-reset-password" class="button button-primary button-wide" type="button">Actualizar contraseña <span>→</span></button>
+      </form>
+    </dialog>
 
     <nav class="mobile-bottom-nav" aria-label="Navegación móvil"><button class="is-active" data-view-link="dashboard" type="button"><span>⌂</span>Inicio</button><button data-view-link="plants" type="button"><span>♧</span>Plantas</button><button data-view-link="alerts" type="button"><span>♧</span>Alertas</button><button data-view-link="settings" type="button"><span>⚙</span>Ajustes</button></nav>
     <script src="js/app.js"></script>

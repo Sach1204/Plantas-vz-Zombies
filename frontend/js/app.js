@@ -14,6 +14,10 @@ const loginTab = document.getElementById('login-tab');
 const registerTab = document.getElementById('register-tab');
 const addPlantDialog = document.getElementById('add-plant-dialog');
 const noticeDialog = document.getElementById('notice-dialog');
+const credentialsDialog = document.getElementById('credentials-dialog');
+const editPlantDialog = document.getElementById('edit-plant-dialog');
+const inviteDialog = document.getElementById('invite-dialog');
+const resetPasswordDialog = document.getElementById('reset-password-dialog');
 const plantGrid = document.getElementById('plant-grid');
 const allPlantsGrid = document.getElementById('all-plants-grid');
 const historyRows = document.getElementById('history-rows');
@@ -100,7 +104,13 @@ async function apiRequest(path, options = {}) {
 function element(tag, className = '', text = '') {
   const node = document.createElement(tag);
   if (className) node.className = className;
-  if (text) node.textContent = text;
+  if (text !== undefined && text !== null && text !== '') {
+    if (typeof text === 'string' && /<[^>]+>/.test(text)) {
+      node.innerHTML = text;
+    } else {
+      node.textContent = text;
+    }
+  }
   return node;
 }
 
@@ -542,6 +552,9 @@ function renderSelectedPlant() {
   renderRecommendations(plant);
   document.getElementById('mini-chart').innerHTML = makeChart(plant.readings.slice(0, 24).reverse(), 'mini');
   renderHistory();
+  if (currentView === 'shared') {
+    renderSharedTeamAndActivities();
+  }
 }
 
 function renderGauges(plant) {
@@ -1036,11 +1049,233 @@ loginTab.addEventListener('click', () => setAuthMode('login'));
 registerTab.addEventListener('click', () => setAuthMode('register'));
 authForm.addEventListener('submit', authenticate);
 document.getElementById('toggle-password').addEventListener('click', setAuthPasswordVisibility);
-document.getElementById('forgot-password').addEventListener('click', () => showNotice(
-  'Recuperar contraseña',
-  'La recuperación de contraseña todavía no está disponible. Contacta con quien administra el jardín para recuperar el acceso.',
-));
+document.getElementById('forgot-password').addEventListener('click', () => {
+  document.getElementById('reset-email').value = document.getElementById('email').value || '';
+  document.getElementById('reset-new-password').value = '';
+  showMessage(document.getElementById('reset-error'), '');
+  showMessage(document.getElementById('reset-success'), '');
+  resetPasswordDialog.showModal();
+});
 document.getElementById('logout-button').addEventListener('click', () => signOut());
+
+async function openCredentialsModal() {
+  const plant = selectedPlant();
+  if (!plant) return;
+  try {
+    const creds = await apiRequest(`/plantas/${encodeURIComponent(plant.id)}/credenciales`);
+    document.getElementById('cred-plant-title').textContent = `Credenciales · ${creds.nombre}`;
+    document.getElementById('cred-device-id').textContent = creds.dispositivo_id;
+    document.getElementById('cred-device-token').textContent = creds.token_dispositivo;
+    const snippet = `#define DEVICE_ID    "${creds.dispositivo_id}"\n` +
+      `#define DEVICE_TOKEN "${creds.token_dispositivo}"\n` +
+      `#define ESPECIE      "${creds.especie}"`;
+    document.getElementById('cred-config-snippet').textContent = snippet;
+    credentialsDialog.showModal();
+  } catch (err) {
+    showNotice('Error', err.message || 'No se pudieron obtener las credenciales.');
+  }
+}
+
+function openEditPlantModal() {
+  const plant = selectedPlant();
+  if (!plant) return;
+  document.getElementById('edit-plant-name').value = plant.nombre;
+  const speciesSelect = document.getElementById('edit-plant-species');
+  speciesSelect.replaceChildren(...species.map((sp) => element('option', '', sp)));
+  speciesSelect.value = plant.especie;
+  showMessage(document.getElementById('edit-plant-error'), '');
+  editPlantDialog.showModal();
+}
+
+async function saveEditPlant() {
+  const plant = selectedPlant();
+  if (!plant) return;
+  const nuevoNombre = document.getElementById('edit-plant-name').value.trim();
+  const nuevaEspecie = document.getElementById('edit-plant-species').value;
+  if (!nuevoNombre) {
+    showMessage(document.getElementById('edit-plant-error'), 'El nombre no puede estar vacío.');
+    return;
+  }
+  try {
+    await apiRequest(`/plantas/${encodeURIComponent(plant.id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ nombre: nuevoNombre, especie: nuevaEspecie }),
+    });
+    editPlantDialog.close();
+    await refreshGarden();
+    renderSelectedPlant();
+  } catch (err) {
+    showMessage(document.getElementById('edit-plant-error'), err.message || 'Error al guardar cambios.');
+  }
+}
+
+async function deletePlant() {
+  const plant = selectedPlant();
+  if (!plant) return;
+  const confirmar = confirm(`¿Estás seguro de que deseas eliminar la planta "${plant.nombre}" y todo su historial de lecturas? Esta acción no se puede deshacer.`);
+  if (!confirmar) return;
+  try {
+    await apiRequest(`/plantas/${encodeURIComponent(plant.id)}`, {
+      method: 'DELETE',
+    });
+    editPlantDialog.close();
+    selectedPlantId = '';
+    await refreshGarden();
+    navigate('plants');
+  } catch (err) {
+    showMessage(document.getElementById('edit-plant-error'), err.message || 'No se pudo eliminar la planta.');
+  }
+}
+
+function openInviteModal() {
+  document.getElementById('invite-email').value = '';
+  showMessage(document.getElementById('invite-error'), '');
+  showMessage(document.getElementById('invite-success'), '');
+  inviteDialog.showModal();
+}
+
+async function sendInvitation() {
+  const plant = selectedPlant();
+  if (!plant) return;
+  const emailInput = document.getElementById('invite-email');
+  const email = emailInput.value.trim();
+  const errorEl = document.getElementById('invite-error');
+  const successEl = document.getElementById('invite-success');
+  showMessage(errorEl, '');
+  showMessage(successEl, '');
+
+  if (!email) {
+    showMessage(errorEl, 'Ingresa un correo electrónico.');
+    return;
+  }
+
+  try {
+    await apiRequest(`/plantas/${encodeURIComponent(plant.id)}/colaboradores`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    showMessage(successEl, `¡${email} agregado al equipo de cuidado!`);
+    emailInput.value = '';
+    await renderSharedTeamAndActivities();
+    setTimeout(() => {
+      inviteDialog.close();
+      showMessage(successEl, '');
+    }, 1200);
+  } catch (err) {
+    showMessage(errorEl, err.message === 'USUARIO_NO_ENCONTRADO' ? 'No se encontró un usuario con ese correo electrónico registrado.' : (err.message || 'Error al invitar cuidador.'));
+  }
+}
+
+async function renderSharedTeamAndActivities() {
+  const plant = selectedPlant();
+  if (!plant) return;
+
+  const membersList = document.getElementById('shared-members-list');
+  const activityList = document.getElementById('shared-activity-list');
+  const activityEmpty = document.getElementById('shared-activity-empty');
+  const membersCount = document.getElementById('shared-members-count');
+  const activityCount = document.getElementById('shared-activity-count');
+
+  try {
+    const [teamRes, actRes] = await Promise.all([
+      apiRequest(`/plantas/${encodeURIComponent(plant.id)}/colaboradores`),
+      apiRequest(`/plantas/${encodeURIComponent(plant.id)}/actividades`),
+    ]);
+
+    const team = teamRes.colaboradores || [];
+    if (membersCount) membersCount.textContent = String(team.length);
+    if (membersList) {
+      membersList.replaceChildren(...team.map((member) => {
+        const initial = (member.email || 'U')[0].toUpperCase();
+        const row = element('div', 'member-row');
+        const info = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = member.email || '';
+        const small = document.createElement('small');
+        small.textContent = (member.rol || '') + (member.es_dueno ? ' · Propietario' : '');
+        info.replaceChildren(strong, small);
+        row.replaceChildren(
+          element('span', 'avatar', initial),
+          info,
+          member.es_dueno ? element('span', 'owner-crown', '♛') : document.createElement('span'),
+        );
+        return row;
+      }));
+    }
+
+    const activities = actRes.actividades || [];
+    if (activityCount) activityCount.textContent = String(activities.length);
+    if (activityEmpty) activityEmpty.classList.toggle('hidden', activities.length > 0);
+    if (activityList) {
+      activityList.replaceChildren(...activities.map((act) => {
+        const row = element('div', 'activity-item');
+        row.style.padding = '8px 0';
+        row.style.borderBottom = '1px solid rgba(0,0,0,0.06)';
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        // Construir DOM correctamente para evitar que el HTML aparezca como texto
+        const actInfo = document.createElement('div');
+        const actStrong = document.createElement('strong');
+        actStrong.textContent = act.accion;
+        const actSmall = document.createElement('small');
+        actSmall.className = 'muted';
+        actSmall.textContent = `por ${act.usuario_email}`;
+        actInfo.append(actStrong, document.createTextNode(' '), actSmall);
+        row.replaceChildren(
+          actInfo,
+          element('small', 'muted', relativeTime(act.marca_temporal)),
+        );
+        return row;
+      }));
+    }
+  } catch (err) {
+    console.error('Error cargando equipo o actividades:', err);
+  }
+}
+
+async function executeCareAction(accion) {
+  const plant = selectedPlant();
+  if (!plant) return;
+  try {
+    await apiRequest(`/plantas/${encodeURIComponent(plant.id)}/actividades`, {
+      method: 'POST',
+      body: JSON.stringify({ accion }),
+    });
+    await renderSharedTeamAndActivities();
+  } catch (err) {
+    showNotice('Error', err.message || 'No se pudo registrar la acción de cuidado.');
+  }
+}
+
+async function submitResetPassword() {
+  const email = document.getElementById('reset-email').value.trim();
+  const nueva_contrasena = document.getElementById('reset-new-password').value;
+  const errorEl = document.getElementById('reset-error');
+  const successEl = document.getElementById('reset-success');
+  showMessage(errorEl, '');
+  showMessage(successEl, '');
+
+  if (!email || !nueva_contrasena) {
+    showMessage(errorEl, 'Por favor completa todos los campos.');
+    return;
+  }
+
+  try {
+    await apiRequest('/auth/recuperar-contrasena', {
+      method: 'POST',
+      body: JSON.stringify({ email, nueva_contrasena }),
+    });
+    showMessage(successEl, 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.');
+    setTimeout(() => {
+      resetPasswordDialog.close();
+      showMessage(successEl, '');
+      setAuthMode('login');
+      document.getElementById('email').value = email;
+    }, 1500);
+  } catch (err) {
+    showMessage(errorEl, err.message === 'USUARIO_NO_ENCONTRADO' ? 'No existe ninguna cuenta registrada con ese correo.' : (err.message || 'Error al restablecer contraseña.'));
+  }
+}
 
 document.addEventListener('click', (event) => {
   const viewLink = event.target.closest('[data-view-link]');
@@ -1055,13 +1290,14 @@ document.addEventListener('click', (event) => {
   if (action === 'close-modal') {
     addPlantDialog.close();
     noticeDialog.close();
+    credentialsDialog?.close();
+    editPlantDialog?.close();
+    inviteDialog?.close();
+    resetPasswordDialog?.close();
   }
-  if (action === 'invite-collaborator' || action === 'care-unavailable') {
-    showNotice('Cuidado compartido', 'La API aún no incluye invitaciones ni acceso compartido. Por ahora tus plantas son privadas y solo tú puedes consultarlas.');
-  }
-  if (action === 'edit-plant') {
-    showNotice('Editar planta', 'La edición de nombre y especie aún no está disponible en la API.');
-  }
+  if (action === 'view-credentials') openCredentialsModal();
+  if (action === 'edit-plant') openEditPlantModal();
+  if (action === 'invite-collaborator') openInviteModal();
 });
 
 document.querySelectorAll('[data-filter]').forEach((button) => {
@@ -1164,6 +1400,41 @@ document.querySelectorAll('[data-detail-tab]').forEach((button) => {
     if (button.dataset.detailTab === 'history') navigate('history');
     if (button.dataset.detailTab === 'shared') navigate('shared');
     if (button.dataset.detailTab === 'overview') navigate('detail');
+  });
+});
+
+document.getElementById('copy-cred-id')?.addEventListener('click', async () => {
+  const val = document.getElementById('cred-device-id').textContent;
+  await navigator.clipboard.writeText(val);
+  const btn = document.getElementById('copy-cred-id');
+  btn.textContent = '¡ID Copiado!';
+  setTimeout(() => { btn.textContent = 'Copiar ID de Dispositivo'; }, 2000);
+});
+
+document.getElementById('copy-cred-token')?.addEventListener('click', async () => {
+  const val = document.getElementById('cred-device-token').textContent;
+  await navigator.clipboard.writeText(val);
+  const btn = document.getElementById('copy-cred-token');
+  btn.textContent = '¡Token Copiado!';
+  setTimeout(() => { btn.textContent = 'Copiar Token JWT'; }, 2000);
+});
+
+document.getElementById('copy-cred-config')?.addEventListener('click', async () => {
+  const val = document.getElementById('cred-config-snippet').textContent;
+  await navigator.clipboard.writeText(val);
+  const btn = document.getElementById('copy-cred-config');
+  btn.textContent = '¡Configuración Copiada!';
+  setTimeout(() => { btn.textContent = 'Copiar Bloque para config.h'; }, 2000);
+});
+
+document.getElementById('save-edit-plant')?.addEventListener('click', saveEditPlant);
+document.getElementById('delete-plant-button')?.addEventListener('click', deletePlant);
+document.getElementById('send-invite-button')?.addEventListener('click', sendInvitation);
+document.getElementById('submit-reset-password')?.addEventListener('click', submitResetPassword);
+
+document.querySelectorAll('[data-care-action]').forEach((button) => {
+  button.addEventListener('click', () => {
+    executeCareAction(button.dataset.careAction);
   });
 });
 
