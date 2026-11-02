@@ -5,6 +5,7 @@ from flask import Blueprint, current_app, g, jsonify, request
 from app.domain.entities.especie import Especie
 from app.domain.entities.lectura import Lectura, OrigenLectura
 from app.domain.exceptions import DatoInvalido, DispositivoNoAutorizado
+from app.presentation.controllers.socket_controller import emitir_lectura
 from app.presentation.security import requiere_dispositivo
 
 api_dispositivos_bp = Blueprint(
@@ -47,6 +48,7 @@ def reportar_lectura(dispositivo_id):
         lectura,
         dispositivo_id=g.dispositivo_id,
     )
+    emitir_lectura(g.planta_id, lectura, diagnostico)
     return jsonify(
         {
             "registrada": True,

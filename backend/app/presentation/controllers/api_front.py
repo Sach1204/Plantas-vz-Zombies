@@ -5,7 +5,12 @@ from flask import Blueprint, current_app, g, jsonify, request
 from app.domain.entities.especie import Especie
 from app.domain.entities.lectura import Lectura, OrigenLectura
 from app.domain.exceptions import DatoInvalido
+from app.presentation.controllers.socket_controller import (
+    emitir_actividad,
+    emitir_lectura,
+)
 from app.presentation.security import requiere_usuario
+from app.presentation.serializers import diagnostico_a_json, lectura_a_json
 
 api_front_bp = Blueprint("api_front", __name__, url_prefix="/api/v1")
 
@@ -19,36 +24,6 @@ def _payload():
     if not isinstance(data, dict):
         raise DatoInvalido("DATOS_DE_ENTRADA_INVALIDOS")
     return data
-
-
-def _a_json_lectura(lectura):
-    return {
-        "especie": lectura.especie.nombre,
-        "humedad": lectura.humedad,
-        "luz": lectura.luz,
-        "temperatura": lectura.temperatura,
-        "marca_temporal": lectura.marca_temporal.isoformat(),
-        "origen": lectura.origen.value,
-    }
-
-
-def _a_json_diagnostico(diagnostico):
-    return {
-        "especie": diagnostico.especie,
-        "estado": diagnostico.estado.value,
-        "parametros": [
-            {
-                "nombre": parametro.nombre,
-                "valor": parametro.valor,
-                "unidad": parametro.unidad,
-                "rango_min": parametro.rango_min,
-                "rango_max": parametro.rango_max,
-                "estado": parametro.estado.value,
-            }
-            for parametro in diagnostico.parametros
-        ],
-        "recomendaciones": list(diagnostico.recomendaciones),
-    }
 
 
 @api_front_bp.get("/especies")
@@ -155,7 +130,7 @@ def consultar_estado(planta_id):
                 "recomendaciones": [],
             }
         )
-    return jsonify(_a_json_diagnostico(diagnostico))
+    return jsonify(diagnostico_a_json(diagnostico))
 
 
 @api_front_bp.get("/plantas/<planta_id>/lecturas")
@@ -165,7 +140,7 @@ def consultar_historial(planta_id):
         planta_id,
         g.usuario_id,
     )
-    return jsonify({"lecturas": [_a_json_lectura(item) for item in lecturas]})
+    return jsonify({"lecturas": [lectura_a_json(item) for item in lecturas]})
 
 
 @api_front_bp.post("/plantas/<planta_id>/lecturas")
@@ -185,7 +160,8 @@ def registrar_lectura_manual(planta_id):
         lectura,
         usuario_id=g.usuario_id,
     )
-    return jsonify(_a_json_diagnostico(diagnostico)), 201
+    emitir_lectura(planta_id, lectura, diagnostico)
+    return jsonify(diagnostico_a_json(diagnostico)), 201
 
 
 @api_front_bp.get("/plantas/<planta_id>/credenciales")
@@ -275,4 +251,5 @@ def registrar_actividad(planta_id):
         g.usuario_id,
         accion,
     )
+    emitir_actividad(planta_id, resultado)
     return jsonify(resultado), 201

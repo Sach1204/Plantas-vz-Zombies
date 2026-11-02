@@ -1,4 +1,5 @@
 const API_URL = 'http://127.0.0.1:5000/api/v1';
+const SOCKET_URL = API_URL.replace(/\/api\/v1\/?$/, '');
 const POLL_INTERVAL_MS = 5000;
 const DISCONNECTED_AFTER_MS = 60_000;
 const ALERTS_STORAGE_KEY = 'materaAlerts';
@@ -42,6 +43,8 @@ let unreadAlerts = 0;
 let alerts = readStoredAlerts();
 let deviceCredentials = null;
 let lastStatuses = new Map();
+let socket;
+const subscribedPlantIds = new Set();
 
 class ApiError extends Error {
   constructor(message, status = 0) {
@@ -277,6 +280,7 @@ async function enterApplication() {
 
   await loadSpecies();
   await refreshGarden();
+  connectRealtime();
   if (!pollTimer) {
     pollTimer = setInterval(() => {
       refreshGarden().catch((error) => {
@@ -329,11 +333,78 @@ async function refreshGarden() {
     }
     trackStatusChanges(plantsBefore, plants);
     renderGarden();
+    syncPlantSubscriptions();
     if (currentView === 'detail' || currentView === 'history' || currentView === 'manual' || currentView === 'shared') {
       renderSelectedPlant();
     }
   } finally {
     isRefreshing = false;
+  }
+}
+
+function connectRealtime() {
+  if (typeof io !== 'function' || socket || !token) return;
+  socket = io(SOCKET_URL, {
+    auth: { token },
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+  });
+  socket.on('connect', () => {
+    subscribedPlantIds.clear();
+    syncPlantSubscriptions();
+  });
+  socket.on('lectura_registrada', applyRealtimeReading);
+  socket.on('actividad_registrada', applyRealtimeActivity);
+}
+
+function disconnectRealtime() {
+  if (socket) {
+    socket.disconnect();
+    socket = undefined;
+  }
+  subscribedPlantIds.clear();
+}
+
+function syncPlantSubscriptions() {
+  if (!socket || !socket.connected) return;
+  const currentIds = new Set(plants.map((plant) => plant.id));
+  currentIds.forEach((plantaId) => {
+    if (subscribedPlantIds.has(plantaId)) return;
+    socket.emit('suscribir_planta', { planta_id: plantaId }, (response) => {
+      if (response?.ok) subscribedPlantIds.add(plantaId);
+    });
+  });
+  [...subscribedPlantIds].forEach((plantaId) => {
+    if (currentIds.has(plantaId)) return;
+    socket.emit('desuscribir_planta', { planta_id: plantaId });
+    subscribedPlantIds.delete(plantaId);
+  });
+}
+
+function applyRealtimeReading(payload) {
+  const plant = plants.find((item) => item.id === payload?.planta_id);
+  if (!plant || !payload?.lectura || !payload?.diagnostico) return;
+  const previousStatus = statusOf(plant);
+  const reading = payload.lectura;
+  plant.readings = [
+    reading,
+    ...(plant.readings || []).filter((item) => item.marca_temporal !== reading.marca_temporal),
+  ];
+  plant.latest = reading;
+  plant.diagnosis = payload.diagnostico;
+  plant.connected = true;
+  const nextStatus = statusOf(plant);
+  if (previousStatus && previousStatus !== nextStatus && nextStatus !== 'SIN_LECTURAS') {
+    addAlert(plant, nextStatus, `El estado de ${plant.nombre} cambió a ${prettyStatus(nextStatus).toLowerCase()}.`);
+  }
+  lastStatuses.set(plant.id, nextStatus);
+  renderGarden();
+  showMessage(document.getElementById('global-error'), '');
+}
+
+function applyRealtimeActivity(payload) {
+  if (payload?.planta_id && currentView === 'shared' && selectedPlantId === payload.planta_id) {
+    renderSharedTeamAndActivities();
   }
 }
 
@@ -856,6 +927,7 @@ function signOut(message = '') {
     clearInterval(pollTimer);
     pollTimer = undefined;
   }
+  disconnectRealtime();
   token = '';
   userEmail = '';
   displayName = '';
@@ -1424,7 +1496,7 @@ document.getElementById('copy-cred-config')?.addEventListener('click', async () 
   await navigator.clipboard.writeText(val);
   const btn = document.getElementById('copy-cred-config');
   btn.textContent = '¡Configuración Copiada!';
-  setTimeout(() => { btn.textContent = 'Copiar Bloque para config.h'; }, 2000);
+  setTimeout(() => { btn.textContent = 'Copiar Bloque (respaldo)'; }, 2000);
 });
 
 document.getElementById('save-edit-plant')?.addEventListener('click', saveEditPlant);

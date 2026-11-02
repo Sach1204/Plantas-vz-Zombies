@@ -238,7 +238,7 @@
         <button class="modal-close" data-action="close-modal" type="button" aria-label="Cerrar">×</button>
         <div class="modal-stepper"><span class="step is-current" data-step-indicator="1">1</span><i></i><span class="step" data-step-indicator="2">2</span><i></i><span class="step" data-step-indicator="3">3</span></div>
         <div class="modal-step" data-step="1"><span class="eyebrow">NUEVA COMPAÑERA</span><h2>Agregar planta</h2><p>Cuéntanos un poquito sobre tu planta.</p><label class="field" for="new-plant-name">Nombre de tu planta<input id="new-plant-name" required maxlength="80" placeholder="Ej. Potos de la sala" /></label><label class="field" for="new-plant-species">Especie<select id="new-plant-species" required></select></label><button id="plant-next" class="button button-primary button-wide" type="button">Continuar <span>→</span></button></div>
-        <div class="modal-step hidden" data-step="2"><span class="eyebrow">PASO 2 · CONECTA TU SENSOR</span><h2>Vincular sensor ESP32</h2><p>Guarda estas credenciales para que el simulador pueda enviar lecturas.</p><div id="new-plant-credentials" class="credentials-panel hidden"><span class="eyebrow">ID DEL DISPOSITIVO</span><code id="new-device-id"></code><span class="eyebrow">TOKEN SECRETO · SE MUESTRA UNA SOLA VEZ</span><code id="new-device-token"></code><button id="copy-new-token" class="button button-secondary button-wide" type="button">Copiar token</button></div><div class="waiting-sensor"><span class="pulse-dot"></span><span id="sensor-waiting-label">Preparando el dispositivo…</span></div><button id="plant-finish" class="button button-primary button-wide" type="button">Continuar con valores manuales</button></div>
+        <div class="modal-step hidden" data-step="2"><span class="eyebrow">PASO 2 · CONECTA TU SENSOR</span><h2>Vincular sensor ESP32</h2><p>Las credenciales ya se guardaron automáticamente en <code>esp32/include/config.h</code>. Solo recompila y ejecuta Wokwi.</p><div id="new-plant-credentials" class="credentials-panel hidden"><span class="eyebrow">ID DEL DISPOSITIVO</span><code id="new-device-id"></code><span class="eyebrow">TOKEN DEL DISPOSITIVO</span><code id="new-device-token"></code><button id="copy-new-token" class="button button-secondary button-wide" type="button">Copiar token</button></div><div class="waiting-sensor"><span class="pulse-dot"></span><span id="sensor-waiting-label">Preparando el dispositivo…</span></div><button id="plant-finish" class="button button-primary button-wide" type="button">Continuar con valores manuales</button></div>
         <div class="modal-step hidden" data-step="3"><span class="success-plant">✓</span><span class="eyebrow">TU JARDÍN CRECE</span><h2>¡Planta agregada!</h2><p id="plant-created-name"></p><p id="first-reading-status" class="muted">Cuando el sensor envíe su primera lectura, aparecerá automáticamente.</p><button id="plant-done" class="button button-primary button-wide" type="button">Ver mi planta <span>→</span></button></div>
       </form>
     </dialog>
@@ -251,7 +251,7 @@
         <span class="notice-icon">🔑</span>
         <span class="eyebrow">CONEXIÓN ESP32 / WOKWI</span>
         <h2 id="cred-plant-title">Credenciales de la Planta</h2>
-        <p>Usa estos datos en tu simulador ESP32 o Wokwi para enviar lecturas en tiempo real.</p>
+        <p>Estos datos ya fueron escritos en <code>esp32/include/config.h</code>. Recompila el firmware y ejecuta Wokwi para enviar lecturas en tiempo real.</p>
         <div class="credentials-panel">
           <div class="credential-block">
             <span class="eyebrow">ID DEL DISPOSITIVO</span>
@@ -271,11 +271,11 @@
           
           <div class="aside-divider"></div>
           <div class="credential-block">
-            <span class="eyebrow">CONFIGURACIÓN LISTA PARA WOKWI (esp32/include/config.h)</span>
+            <span class="eyebrow">YA ESCRITO EN esp32/include/config.h</span>
             <div class="credential-code-wrap credential-code-wrap--pre">
               <pre><code id="cred-config-snippet"></code></pre>
             </div>
-            <button id="copy-cred-config" class="button button-primary button-wide" type="button">Copiar Bloque para config.h</button>
+            <button id="copy-cred-config" class="button button-primary button-wide" type="button">Copiar Bloque (respaldo)</button>
           </div>
         </div>
       </div>
@@ -336,6 +336,7 @@
     </dialog>
 
     <nav class="mobile-bottom-nav" aria-label="Navegación móvil"><button class="is-active" data-view-link="dashboard" type="button"><span>⌂</span>Inicio</button><button data-view-link="plants" type="button"><span>♧</span>Plantas</button><button data-view-link="alerts" type="button"><span>♧</span>Alertas</button><button data-view-link="settings" type="button"><span>⚙</span>Ajustes</button></nav>
+    <script src="js/vendor/socket.io.min.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

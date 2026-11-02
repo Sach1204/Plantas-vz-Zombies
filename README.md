@@ -23,9 +23,12 @@ py -3.12 .\run.py
 
 La API queda disponible en `http://127.0.0.1:5000`. La base SQLite guarda usuarios,
 plantas y lecturas en `backend/app/infrastructure/data/matera.sqlite3`. Define
-`MATERA_DATABASE_PATH` para usar otra ubicación. Si no se define
-`MATERA_JWT_SECRET`, se genera un secreto temporal al iniciar; configura uno estable
-para conservar la validez de los tokens entre reinicios.
+`MATERA_DATABASE_PATH` para usar otra ubicación.
+
+Si no se define `MATERA_JWT_SECRET`, el backend genera un secreto una sola vez y lo
+guarda en `backend/app/infrastructure/data/jwt_secret.key`; en los siguientes arranques
+lo reutiliza, así que los tokens de los dispositivos siguen siendo válidos. Puedes
+sobrescribirlo con `MATERA_JWT_SECRET` o cambiar la ruta con `MATERA_JWT_SECRET_PATH`.
 
 La tabla de referencia se selecciona por configuración:
 
@@ -49,18 +52,39 @@ py -3.12 -m http.server 8000
 Abre `http://127.0.0.1:8000`. Regístrate o inicia sesión, agrega una planta y elige su
 especie. La interfaz responsive incluye panel del jardín, colección con filtros, detalle
 por planta, gráficas e historial exportable, diagnóstico manual, notificaciones locales y
-configuración. El panel consulta automáticamente el estado y el historial cada cinco
-segundos.
+configuración. El panel mantiene una consulta de respaldo cada cinco segundos y recibe las
+lecturas nuevas por WebSocket sin refrescar la página.
 
-El alta de planta usa un flujo de tres pasos. Copia y guarda el identificador y token del
-dispositivo cuando se muestran: el token aparece una sola vez y es independiente del token
-de usuario.
+El alta de planta usa un flujo de tres pasos. Al crear la planta, el backend escribe
+automáticamente su identificador, token y especie en `esp32/include/config.h`; no hace
+falta copiar nada a mano. Para cambiar de planta activa en Wokwi, abre el detalle de la
+planta y consulta sus credenciales: el archivo se vuelve a escribir con esa planta. El
+token del dispositivo es independiente del token de usuario.
 
 El mockup también muestra invitaciones y cuidado compartido. La API de esta fase no
 implementa colaboradores ni invitaciones; esa pantalla informa la limitación y no simula
 un permiso que el backend no puede comprobar. Las alertas visibles se generan en este
 navegador cuando cambia el estado observado de una planta; no son notificaciones push del
 servidor.
+
+## Actualizaciones en tiempo real
+
+El backend publica eventos con Flask-SocketIO en el mismo puerto que la API. El cliente de
+Socket.IO se sirve desde `frontend/js/vendor/socket.io.min.js`, así que no hace falta
+conexión a internet para usarlo.
+
+- Al iniciar sesión, el navegador abre la conexión con su JWT y se suscribe a cada planta
+  que puede consultar (propietario o colaborador).
+- Cuando llega una lectura por `POST /api/dispositivos/{id}/lecturas` o por
+  `POST /api/v1/plantas/{id}/lecturas`, el backend calcula el diagnóstico y emite
+  `lectura_registrada` a la sala de esa planta.
+- El frontend actualiza el estado, las gráficas y las alertas con el evento recibido.
+- Los cambios de actividad compartida emiten `actividad_registrada`.
+
+La conexión se autentica con el mismo JWT de usuario; el servidor comprueba el permiso de
+cada planta antes de permitir la suscripción. Los dispositivos ESP32 siguen reportando por
+HTTP, de modo que el backend puede guardar lecturas aunque no haya ningún navegador
+conectado.
 
 ## Ejecutar el simulador ESP32
 
