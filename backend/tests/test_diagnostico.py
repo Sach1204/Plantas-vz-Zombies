@@ -10,6 +10,7 @@ def client(tmp_path):
             "TESTING": True,
             "DATABASE_PATH": str(tmp_path / "matera.sqlite3"),
             "JWT_SECRET": "test-secret",
+            "DEVICE_CONFIG_PATH": None,
         }
     )
     return app.test_client()
@@ -139,6 +140,7 @@ def test_tabla_referencia_sqlite_se_elige_por_configuracion(tmp_path):
             "TESTING": True,
             "DATABASE_PATH": str(tmp_path / "matera.sqlite3"),
             "JWT_SECRET": "test-secret",
+            "DEVICE_CONFIG_PATH": None,
             "REFERENCE_ADAPTER": "sqlite",
         }
     )

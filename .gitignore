@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 backend/app/infrastructure/data/matera.sqlite3
+backend/app/infrastructure/data/jwt_secret.key
 .pio/
 .vscode/
 esp32/include/config.h

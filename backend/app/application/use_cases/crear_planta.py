@@ -7,10 +7,17 @@ from app.domain.exceptions import EspecieNoSoportada
 
 
 class CrearPlanta:
-    def __init__(self, plantas, referencias, emisor_token):
+    def __init__(
+        self,
+        plantas,
+        referencias,
+        emisor_token,
+        configurador_dispositivo=None,
+    ):
         self.plantas = plantas
         self.referencias = referencias
         self.emisor_token = emisor_token
+        self.configurador_dispositivo = configurador_dispositivo
 
     def ejecutar(self, usuario_id: UsuarioId, nombre, especie):
         especie = Especie(especie)
@@ -26,7 +33,10 @@ class CrearPlanta:
             dispositivo_id=str(uuid4()),
         )
         self.plantas.guardar(planta)
-        return planta, self.emisor_token.emitir_dispositivo(
+        token_dispositivo = self.emisor_token.emitir_dispositivo(
             planta.dispositivo_id,
             planta.id,
         )
+        if self.configurador_dispositivo is not None:
+            self.configurador_dispositivo.escribir(planta, token_dispositivo)
+        return planta, token_dispositivo

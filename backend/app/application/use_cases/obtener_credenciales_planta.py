@@ -3,9 +3,10 @@ from app.domain.exceptions import RecursoNoEncontrado
 
 
 class ObtenerCredencialesPlanta:
-    def __init__(self, plantas, emisor_token):
+    def __init__(self, plantas, emisor_token, configurador_dispositivo=None):
         self.plantas = plantas
         self.emisor_token = emisor_token
+        self.configurador_dispositivo = configurador_dispositivo
 
     def ejecutar(self, planta_id, usuario_id: UsuarioId):
         planta = self.plantas.obtener(planta_id)
@@ -17,6 +18,8 @@ class ObtenerCredencialesPlanta:
             planta.dispositivo_id,
             planta.id,
         )
+        if self.configurador_dispositivo is not None:
+            self.configurador_dispositivo.escribir(planta, token)
         return {
             "planta_id": planta.id,
             "nombre": planta.nombre,

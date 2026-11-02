@@ -36,15 +36,39 @@ from app.infrastructure.repositories.sqlite_referencia import (
     cargar_referencias_iniciales,
 )
 from app.infrastructure.repositories.sqlite_usuarios import SQLiteUsuarios
+from app.infrastructure.security.device_config_writer import (
+    EscritorConfiguracionDispositivo,
+)
 from app.infrastructure.security.jwt_tokens import JwtTokenService
 from app.infrastructure.security.password_hasher import WerkzeugHashContrasenas
 from app.presentation.controllers.api_front import api_front_bp
 from app.presentation.controllers.api_dispositivos import api_dispositivos_bp
+from app.presentation.controllers.socket_controller import (
+    inicializar_socketio,
+)
 from app.presentation.errors import configurar_manejadores_errores
 
 
 APP_DIR = Path(__file__).resolve().parent
 CSV_PATH = APP_DIR / "infrastructure" / "data" / "plantas.csv"
+JWT_SECRET_PATH = APP_DIR / "infrastructure" / "data" / "jwt_secret.key"
+DEVICE_CONFIG_PATH = APP_DIR.parent.parent / "esp32" / "include" / "config.h"
+
+
+def _cargar_o_crear_secreto(ruta):
+    ruta = Path(ruta)
+    if ruta.exists():
+        secreto = ruta.read_text(encoding="utf-8").strip()
+        if secreto:
+            return secreto
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    secreto = secrets.token_urlsafe(48)
+    ruta.write_text(secreto, encoding="utf-8")
+    try:
+        ruta.chmod(0o600)
+    except OSError:
+        pass
+    return secreto
 
 
 def create_app(configuracion=None):
@@ -58,11 +82,21 @@ def create_app(configuracion=None):
         ),
         REFERENCE_ADAPTER=os.environ.get("MATERA_REFERENCE_ADAPTER", "csv"),
         JWT_SECRET=os.environ.get("MATERA_JWT_SECRET"),
+        JWT_SECRET_PATH=os.environ.get(
+            "MATERA_JWT_SECRET_PATH",
+            str(JWT_SECRET_PATH),
+        ),
+        DEVICE_CONFIG_PATH=os.environ.get(
+            "MATERA_DEVICE_CONFIG_PATH",
+            str(DEVICE_CONFIG_PATH),
+        ),
     )
     if configuracion:
         app.config.update(configuracion)
     if not app.config["JWT_SECRET"]:
-        app.config["JWT_SECRET"] = secrets.token_urlsafe(32)
+        app.config["JWT_SECRET"] = _cargar_o_crear_secreto(
+            app.config["JWT_SECRET_PATH"]
+        )
 
     base_datos = SQLiteDatabase(app.config["DATABASE_PATH"])
     referencia_csv = CSVReferenciaPlantas(str(CSV_PATH))
@@ -80,6 +114,9 @@ def create_app(configuracion=None):
     usuarios = SQLiteUsuarios(base_datos)
     colaboradores = SQLiteColaboradores(base_datos)
     emisor_token = JwtTokenService(app.config["JWT_SECRET"])
+    escritor_dispositivo = EscritorConfiguracionDispositivo(
+        app.config["DEVICE_CONFIG_PATH"]
+    )
     hash_contrasenas = WerkzeugHashContrasenas()
     validador = ValidadorDeEstado(EvaluadorPlanta(), Recomendador())
 
@@ -102,8 +139,17 @@ def create_app(configuracion=None):
             validador,
         ),
         "consultar_historial": ConsultarHistorial(plantas, historial),
-        "crear_planta": CrearPlanta(plantas, referencias, emisor_token),
-        "obtener_credenciales_planta": ObtenerCredencialesPlanta(plantas, emisor_token),
+        "crear_planta": CrearPlanta(
+            plantas,
+            referencias,
+            emisor_token,
+            escritor_dispositivo,
+        ),
+        "obtener_credenciales_planta": ObtenerCredencialesPlanta(
+            plantas,
+            emisor_token,
+            escritor_dispositivo,
+        ),
         "editar_planta": EditarPlanta(plantas, referencias),
         "eliminar_planta": EliminarPlanta(plantas),
         "invitar_colaborador": InvitarColaborador(plantas, usuarios, colaboradores),
@@ -125,5 +171,6 @@ def create_app(configuracion=None):
     app.register_blueprint(api_front_bp)
     app.register_blueprint(api_dispositivos_bp)
     configurar_manejadores_errores(app)
+    inicializar_socketio(app)
 
     return app

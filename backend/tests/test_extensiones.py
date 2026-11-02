@@ -9,6 +9,7 @@ def entorno(tmp_path):
             "TESTING": True,
             "DATABASE_PATH": str(tmp_path / "matera.sqlite3"),
             "JWT_SECRET": "extension-test-secret",
+            "DEVICE_CONFIG_PATH": None,
         }
     )
     cliente = app.test_client()

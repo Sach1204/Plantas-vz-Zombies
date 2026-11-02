@@ -3,8 +3,8 @@
 
 // ============================================================================
 // CREDENCIALES DEL DISPOSITIVO
-// Copia este archivo como config.h y pega aquí el Identificador y el Token
-// mostrados por el frontend en el modal del paso 2 de "Agregar planta".
+// El backend crea y actualiza config.h automáticamente al agregar una planta
+// o al consultar sus credenciales. Usa este archivo solo como referencia.
 // config.h está ignorado por git para no subir credenciales reales.
 // ============================================================================
 #define DEVICE_ID    "id-del-dispositivo"
